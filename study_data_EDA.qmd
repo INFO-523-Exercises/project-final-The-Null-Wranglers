@@ -1,0 +1,102 @@
+---
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load-pkgs
+#| message: false
+
+suppressWarnings(library(tidyverse))
+library(knitr)
+library(lubridate)
+library(ggplot2)
+```
+
+## Dataset Setup
+
+```{r}
+
+# set working directory
+#setwd("C:/Users/krist/OneDrive/Documents/R/project-final-The-Null-Wranglers")
+
+# read in data
+study_data <- read.csv("data/study_data.csv")
+summary(study_data)
+```
+```{r, warning=FALSE}
+# How time affects classes (columns AH to AM) for different colleges? - Anjani
+
+# Filter the data for the specified colleges
+selected_colleges <- c("College of Agric and Life Sci", "College of Social & Behav Sci", "Eller College of Management", "College of Humanities", "College of Science")
+filtered_data <- study_data[study_data$College %in% selected_colleges, ]
+
+# Create separate plots for each time slot
+time_slots <- c("Early_Morning", "Mid_Morning", "Early_Afternoon", "Mid_Afternoon", "Evening", "Asynchronous")
+
+plots_list <- lapply(time_slots, function(slot) {
+  ggplot(filtered_data, aes_string(x = "College", y = slot, fill = "College")) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = paste("Total number of classes students attended in ", slot, "by Different colleges"),
+         x = "Colleges", y = "Number of Classes Attended") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+})
+
+# Print individual plots
+for (i in seq_along(plots_list)) {
+  print(plots_list[[i]])
+}
+```
+
+```{r}
+# Total number of classes per week (AN to AT) in different colleges - Anjani
+
+# Filter the data for the specified colleges
+selected_colleges <- c("College of Agric and Life Sci", "College of Social & Behav Sci", "Eller College of Management", "College of Humanities", "College of Science")
+filtered_data <- study_data[study_data$College %in% selected_colleges, ]
+
+# Create separate plots for each time slot
+time_slots <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday") #there were no classes in Saturdays and Sundays, so I removed them from the list
+
+plots_list <- lapply(time_slots, function(slot) {
+  ggplot(filtered_data, aes_string(x = "College", y = slot, fill = "College")) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = paste("Total number of classes students attended in ", slot, "by Different colleges"),
+         x = "Colleges", y = "Number of Classes Attended") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+})
+
+# Print individual plots
+for (i in seq_along(plots_list)) {
+  print(plots_list[[i]])
+}
+```
+
+```{r}
+# Mean Number of students enrolled in in-person vs online vs … (BC to BH) for different colleges - Utkarsha
+
+
+# Filter the data for the specified colleges
+selected_colleges <- c("College of Agric and Life Sci", "College of Social & Behav Sci", "Eller College of Management", "College of Humanities", "College of Science")
+filtered_data <- study_data[study_data$College %in% selected_colleges, ]
+
+# Create separate plots for each time slot
+time_slots <- c("In_Person", "Full_Online", "IntractTV", "Hybrid", "Live_Online", "Reg_Session") 
+
+plots_list <- lapply(time_slots, function(slot) {
+  ggplot(filtered_data, aes_string(x = "College", y = slot, fill = "College")) +
+    geom_bar(stat = "identity", position = "dodge") +
+    labs(title = paste("Total number of classes students attended in ", slot, "by Different colleges"),
+         x = "Colleges", y = "Number of Classes Attended") +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+})
+
+# Print individual plots
+for (i in seq_along(plots_list)) {
+  print(plots_list[[i]])
+}
+```
+
