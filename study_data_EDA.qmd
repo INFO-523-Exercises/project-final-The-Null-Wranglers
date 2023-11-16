@@ -24,6 +24,7 @@ library(ggplot2)
 study_data <- read.csv("data/study_data.csv")
 summary(study_data)
 ```
+
 ```{r, warning=FALSE}
 # How time affects classes (columns AH to AM) for different colleges? - Anjani
 
@@ -98,5 +99,80 @@ plots_list <- lapply(time_slots, function(slot) {
 for (i in seq_along(plots_list)) {
   print(plots_list[[i]])
 }
+```
+
+```{r}
+# How time affects classes (columns AH to AM) for different colleges? - Anjani
+
+library(dplyr)
+
+# Create a table for each time slot
+time_slots <- c("Early_Morning", "Mid_Morning", "Early_Afternoon", "Mid_Afternoon", "Evening", "Asynchronous")
+
+tables_list <- lapply(time_slots, function(slot) {
+  table_data <- study_data %>%
+    group_by(College) %>%
+    summarise(Mean_Classes_Attended = round(mean(get(slot), na.rm = TRUE), 2))
+  
+  names(table_data)[2] <- paste("Mean_", slot)
+  table_data
+})
+
+# Merge tables into a single table by College name
+merged_table <- Reduce(function(x, y) merge(x, y, by = "College", all = TRUE), tables_list)
+
+# Display the merged table
+print(merged_table)
+
+```
+
+```{r}
+# Total number of classes per week (AN to AT) in different colleges - Anjani
+
+library(dplyr)
+
+# Create a table for each day of the week
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+tables_list <- lapply(weekdays, function(day) {
+  table_data <- study_data %>%
+    group_by(College) %>%
+    summarise(Mean_Classes_Attended = round(mean(get(day), na.rm = TRUE), 2))
+  
+  names(table_data)[2] <- paste("Mean_Classes_", day)
+  table_data
+})
+
+# Merge tables into a single table by College name
+merged_table <- Reduce(function(x, y) merge(x, y, by = "College", all = TRUE), tables_list)
+
+# Display the merged table
+print(merged_table)
+
+```
+
+```{r}
+# Mean Number of students enrolled in in-person vs online vs … (BC to BH) for different colleges - Utkarsha
+
+library(dplyr)
+
+# Create a table for each course type
+course_types <- c("In_Person", "Full_Online", "IntractTV", "Hybrid", "Live_Online", "Reg_Session")
+
+tables_list <- lapply(course_types, function(course) {
+  table_data <- study_data %>%
+    group_by(College) %>%
+    summarise(Mean_Enrollment = round(mean(get(course), na.rm = TRUE), 2))
+  
+  names(table_data)[2] <- paste("Mean_Enrollment_", course)
+  table_data
+})
+
+# Merge tables into a single table by College name
+merged_table <- Reduce(function(x, y) merge(x, y, by = "College", all = TRUE), tables_list)
+
+# Display the merged table
+print(merged_table)
+
 ```
 
