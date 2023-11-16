@@ -78,6 +78,23 @@ Use some from the code.qm - just add labels
 
 Calc the mean averages overall - high - enrollemnt, pass, d, e, w, dew
 
+```{r}
+clean_dew_data<- read.csv("data/clean_dew_data.csv")
+# Calculating means
+means <- c(
+  mean(clean_dew_data$Total.Student.Count)
+  
+)
+
+# Creating a data frame
+means_data <- data.frame(
+  Variable = c("Total Student Count"),
+  Mean_Value = means
+)
+# Creating a kable table
+kable(means_data,  caption = "Mean of Enrollment, Pass grades, DEW Grades ")
+```
+
 Visualiaze in bar
 
 ## Averages by College -R
@@ -85,6 +102,66 @@ Visualiaze in bar
 Calc the mean averages overall - high - enrollemnt, pass, d, e, w, dew
 
 Visualiaze in bar
+
+```{r}
+# Assuming you have the ggplot2 library installed
+# If not, install it using install.packages("ggplot2")
+library(ggplot2)
+
+# Define the order of variables
+variable_order <- c( "Pass Grade Count", "D Grade Count", "Fail Grade Count", "Withdraw Grade Count", "DEW Count")
+
+# Creating a data frame with the means
+means_data <- data.frame(
+  Variable = factor(variable_order, levels = variable_order),
+  Mean_Value = c(
+    #mean(clean_dew_data$Total.Student.Count), Write a note on this
+    mean(clean_dew_data$PASS_GRADE_COUNT),
+    mean(clean_dew_data$D_GRADE_COUNT),
+    mean(clean_dew_data$FAIL_GRADE_COUNT),
+    mean(clean_dew_data$WITHDRAW_GRADE_COUNT),
+    mean(clean_dew_data$DEW_COUNT)
+  )
+)
+
+# Creating a bar plot
+ggplot(means_data, aes(x = Variable, y = Mean_Value, fill = Variable)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = round(Mean_Value, 2)), vjust = -0.5, size = 3) +  # Add text labels
+  labs(title = "Mean of Percentages of Pass grade along with DEW Grades",
+       x = "Variables",
+       y = "Mean Value") +
+  theme_minimal()
+
+```
+
+```{r}
+# Assuming you have the dplyr, knitr, and stringr libraries installed
+# If not, install them using install.packages(c("dplyr", "knitr", "stringr"))
+library(dplyr)
+library(knitr)
+library(stringr)
+
+# Group by College and calculate the mean for each grade-related column
+college_means_data <- clean_dew_data %>%
+  group_by(College) %>%
+  summarise(PASS_GRADE_COUNT = mean(PASS_GRADE_COUNT),
+            D_GRADE_COUNT = mean(D_GRADE_COUNT),
+            FAIL_GRADE_COUNT = mean(FAIL_GRADE_COUNT),
+            WITHDRAW_GRADE_COUNT = mean(WITHDRAW_GRADE_COUNT),
+            DEW_COUNT = mean(DEW_COUNT))
+
+# Remove underscores from column names
+names(college_means_data) <- str_replace_all(names(college_means_data), "_", " ")
+
+# Round off mean values to two decimal points
+college_means_data[, -1] <- round(college_means_data[, -1], 2)
+
+# Create a kable table for means of each grade-related column for each college
+kable(college_means_data, 
+               caption = "Means for Total Pass, D, E, W, and Total DEW Counts Across Colleges")
+
+```
 
 ## Colleges DEW chart and total enrollment - table -K
 
