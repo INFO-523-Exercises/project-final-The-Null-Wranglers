@@ -25,23 +25,68 @@ kable(head(dew_data))
 
 Add brief description of data
 
-## Total number of courses per semester
+## Total number of courses per semester - K
+
+```{r}
+#| code-fold: true
+#| code-summary: "summary of total courses"
+
+# add the column names
+table1<- dew_data %>% group_by(College) %>% count(TERM_LD)
+table1 <- table1 %>% pivot_wider(names_from = TERM_LD, values_from = n)
+kable(table1, caption = "Total Course Offering for Each College per Semester"
+      )
+```
+
+After examining this data, we are limiting the colleges to x,y, z because a, b,c .
+
+```{r}
+#| code-fold: true
+#| code-summary: "remove low course offering colleges"
+dew_data <- dew_data %>% filter(College != "College of Medicine - Tucson",
+                                College != "College of Nursing",
+                                College != "College of Public Health",
+                                College != "Colleges of Letters Arts & Sci",
+                                College != "Graduate College",
+                                College != "James E Rogers College of Law",
+                                College != "R Ken Coit College of Pharmacy",
+                                College != "W.A. Franke Honors College")
+
+```
+
+```{r }
+#| code-fold: true
+#| code-summary: "summary of total courses"
+
+# table2 <- dew_data %>% group_by(College) %>% count(Total.Student.Count)
+# kable(table2, caption = "Total Student Enrollment for Courses in Each College"
+#       )
+```
+
+```{r fig.width=11}
+dew_data %>% 
+  group_by(TERM_LD, Course.Level) %>% 
+  ggplot(aes( x = TERM_LD,
+              fill = Course.Level))+
+  geom_bar(position = "dodge")+
+  geom_text(stat='count', aes(label=..count..), vjust=-1, hjust= 1)
+```
 
 Use some from the code.qm - just add labels
 
-## Overall Averages
+## Overall Averages - R
 
 Calc the mean averages overall - high - enrollemnt, pass, d, e, w, dew
 
 Visualiaze in bar
 
-## Averages by College
+## Averages by College -R
 
 Calc the mean averages overall - high - enrollemnt, pass, d, e, w, dew
 
 Visualiaze in bar
 
-## Colleges DEW chart and total enrollment
+## Colleges DEW chart and total enrollment - table -K
 
 Bar of dew total per college
 

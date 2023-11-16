@@ -443,6 +443,15 @@ study_data <- study_data %>% filter(Course.Description != "Internship",
                                     Course.Description != "Honors Preceptorship",
                                     Course.Description != "Honors Directed Research")
 
+study_data <- study_data %>% filter(College != "College of Medicine - Tucson",
+                                College != "College of Nursing",
+                                College != "College of Public Health",
+                                College != "Colleges of Letters Arts & Sci",
+                                College != "Graduate College",
+                                College != "James E Rogers College of Law",
+                                College != "R Ken Coit College of Pharmacy",
+                                College != "W.A. Franke Honors College")
+
 
 write.csv(study_data, "data/study_data.csv", row.names = TRUE)
 
