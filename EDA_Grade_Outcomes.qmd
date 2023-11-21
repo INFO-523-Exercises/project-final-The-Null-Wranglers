@@ -34,8 +34,7 @@ Add brief description of data
 # add the column names
 table1<- dew_data %>% group_by(College) %>% count(TERM_LD)
 table1 <- table1 %>% pivot_wider(names_from = TERM_LD, values_from = n)
-kable(table1, caption = "Total Course Offering for Each College per Semester"
-      )
+kable(table1, caption = "Total Course Offering for Each College per Semester")
 ```
 
 After examining this data, we are limiting the colleges to x,y, z because a, b,c .
@@ -56,46 +55,64 @@ dew_data <- dew_data %>% filter(College != "College of Medicine - Tucson",
 
 ```{r }
 #| code-fold: true
-#| code-summary: "summary of total courses"
-
-# table2 <- dew_data %>% group_by(College) %>% count(Total.Student.Count)
-# kable(table2, caption = "Total Student Enrollment for Courses in Each College"
-#       )
+#| code-summary: "summary of total enrollment"
+# total enrollment table
+enrollment <- aggregate(Total.Student.Count~College + TERM_LD, data=dew_data, sum)
+enrollment <- enrollment %>% pivot_wider(names_from = TERM_LD, values_from = Total.Student.Count)
+kable(enrollment, caption =  "Total Student Enrollment for Each College per Semester")
 ```
 
-```{r fig.width=11}
-dew_data %>% 
-  group_by(TERM_LD, Course.Level) %>% 
-  ggplot(aes( x = TERM_LD,
-              fill = Course.Level))+
-  geom_bar(position = "dodge")+
-  geom_text(stat='count', aes(label=..count..), vjust=-1, hjust= 1)
+```{r}
+#| code-fold: true
+#| code-summary: "summary of total enrollment"
+dew_total <- aggregate(DEW_COUNT~College + TERM_LD, data=dew_data, sum)
+dew_total <- dew_total %>% pivot_wider(names_from = TERM_LD, values_from = DEW_COUNT)
+kable(dew_total, caption =  "Total D, F, W Grade Counts for Each College per Semester")
 ```
 
-Use some from the code.qm - just add labels
+Go down to just top 5 colleges
+
+```{r}
+#| code-fold: true
+#| code-summary: "summary of total enrollment"
+dew_data <- dew_data %>% filter(College != "College of Applied Sci & Tech",
+                                College != "College of Education",
+                                College != "College of Engineering",
+                                College != "College of Fine Arts")
+```
 
 ## Overall Averages - R
 
-Calc the mean averages overall - high - enrollemnt, pass, d, e, w, dew
-
 ```{r}
-clean_dew_data<- read.csv("data/clean_dew_data.csv")
-# Calculating means
-means <- c(
-  mean(clean_dew_data$Total.Student.Count)
-  
-)
-
-# Creating a data frame
-means_data <- data.frame(
-  Variable = c("Total Student Count"),
-  Mean_Value = means
-)
-# Creating a kable table
-kable(means_data,  caption = "Mean of Enrollment, Pass grades, DEW Grades ")
+#| code-fold: true
+#| code-summary: "average number of students per course"
+student_per_course <- aggregate(Total.Student.Count ~College + TERM_LD, data=dew_data, mean)
+# round to nearest whole digit
+student_per_course$Total.Student.Count <- round(student_per_course$Total.Student.Count)
+# pivot wider
+student_per_course <- student_per_course %>% pivot_wider(names_from = TERM_LD, values_from = Total.Student.Count)
+# display table
+kable(student_per_course, caption =  "Average Number of Students per Course by College Each Semester")
 ```
 
-Visualiaze in bar
+```{r}
+#| code-fold: true
+#| code-summary: "average number of students per course"
+dew_per_course <- aggregate(Percent.DEW ~College + TERM_LD, data=dew_data, mean)
+# round to 2 digits
+dew_per_course$Percent.DEW <- round(dew_per_course$Percent.DEW, 2)
+# pivot wider
+dew_per_course <- dew_per_course %>% pivot_wider(names_from = TERM_LD, values_from = Percent.DEW)
+# display table
+kable(dew_per_course, caption =  "Average Number of D, F, and W Grade(percentage) per Course by College Each Semester")
+```
+
+Despite enrollment staying steady, we see a noticeable decrease in DEW outcomes for the spring of 2020. Followed by an increase for the fall of 2020.
+
+```{r}
+# should we add a line chart here?
+  
+```
 
 ## Averages by College -R
 
@@ -116,11 +133,11 @@ means_data <- data.frame(
   Variable = factor(variable_order, levels = variable_order),
   Mean_Value = c(
     #mean(clean_dew_data$Total.Student.Count), Write a note on this
-    mean(clean_dew_data$PASS_GRADE_COUNT),
-    mean(clean_dew_data$D_GRADE_COUNT),
-    mean(clean_dew_data$FAIL_GRADE_COUNT),
-    mean(clean_dew_data$WITHDRAW_GRADE_COUNT),
-    mean(clean_dew_data$DEW_COUNT)
+    mean(dew_data$PASS_GRADE_COUNT),
+    mean(dew_data$D_GRADE_COUNT),
+    mean(dew_data$FAIL_GRADE_COUNT),
+    mean(dew_data$WITHDRAW_GRADE_COUNT),
+    mean(dew_data$DEW_COUNT)
   )
 )
 
@@ -143,7 +160,7 @@ library(knitr)
 library(stringr)
 
 # Group by College and calculate the mean for each grade-related column
-college_means_data <- clean_dew_data %>%
+college_means_data <- dew_data %>%
   group_by(College) %>%
   summarise(PASS_GRADE_COUNT = mean(PASS_GRADE_COUNT),
             D_GRADE_COUNT = mean(D_GRADE_COUNT),
@@ -162,10 +179,6 @@ kable(college_means_data,
                caption = "Means for Total Pass, D, E, W, and Total DEW Counts Across Colleges")
 
 ```
-
-## Colleges DEW chart and total enrollment - table -K
-
-Bar of dew total per college
 
 ## find outliers
 
