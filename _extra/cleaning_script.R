@@ -402,27 +402,29 @@ study_data <- combined_data %>%
 # now that data is combined remove all graduate level courses as we will only consider undergraduate course 
 study_data <- study_data %>% 
   filter(Course.Level != "Graduate")
+#| code-fold: true
+#| code-summary: "remove low course offering colleges"
+study_data <- study_data %>% filter(College != "College of Medicine - Tucson",
+                                College != "College of Nursing",
+                                College != "College of Public Health",
+                                College != "Colleges of Letters Arts & Sci",
+                                College != "Graduate College",
+                                College != "James E Rogers College of Law",
+                                College != "R Ken Coit College of Pharmacy",
+                                College != "W.A. Franke Honors College")
+study_data <- study_data %>% filter(College != "College of Applied Sci & Tech",
+                                College != "College of Education",
+                                College != "College of Engineering",
+                                College != "College of Fine Arts")
 
 # create a numeric variable for college
 unique(study_data$College)
 study_data <- study_data %>% 
   mutate(College_Number = case_when(College == "College of Agric and Life Sci" ~ 1,
                                     College == "Eller College of Management" ~ 2,
-                                    College == "College of Applied Sci & Tech" ~ 3,
-                                    College == "College of Humanities" ~ 4,
-                                    College == "College of Social & Behav Sci" ~ 5,
-                                    College == "Graduate College" ~ 6,
-                                    College == "College of Engineering" ~ 7,
-                                    College == "College of Fine Arts" ~ 8,
-                                    College == "College of Science" ~ 9,
-                                    College == "College of Public Health" ~ 10,
-                                    College == "College of Medicine - Tucson" ~ 11,
-                                    College == "College of Education" ~ 12,
-                                    College == "Colleges of Letters Arts & Sci" ~ 13,
-                                    College == "W.A. Franke Honors College" ~ 14,
-                                    College == "James E Rogers College of Law" ~ 15,
-                                    College == "College of Nursing" ~ 16,
-                                    College == "R Ken Coit College of Pharmacy" ~ 17))
+                                    College == "College of Humanities" ~ 3,
+                                    College == "College of Social & Behav Sci" ~ 4,
+                                    College == "College of Science" ~ 5))
 
 
 
@@ -443,14 +445,6 @@ study_data <- study_data %>% filter(Course.Description != "Internship",
                                     Course.Description != "Honors Preceptorship",
                                     Course.Description != "Honors Directed Research")
 
-study_data <- study_data %>% filter(College != "College of Medicine - Tucson",
-                                College != "College of Nursing",
-                                College != "College of Public Health",
-                                College != "Colleges of Letters Arts & Sci",
-                                College != "Graduate College",
-                                College != "James E Rogers College of Law",
-                                College != "R Ken Coit College of Pharmacy",
-                                College != "W.A. Franke Honors College")
 
 
 write.csv(study_data, "data/study_data.csv", row.names = TRUE)

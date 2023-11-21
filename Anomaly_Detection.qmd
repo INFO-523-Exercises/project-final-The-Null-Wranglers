@@ -1,0 +1,19 @@
+---
+title: "Anomaly Detection"
+author: "Null Wranglers"
+editor: visual
+---
+
+## find outliers
+
+histogram of dew percent
+
+whisker and box plot by semester by college
+
+Summary of quartiles by semester and by college - what is the percentage for outliers - say more than 50% - High Dew
+
+pull a df of highest dew and highest pass
+
+count of how from each college in new df scatter plot colored/clustered by college
+
+add a label either high or low (high being over 55% dew percentage) - scatter plot courses and color by label)

@@ -180,6 +180,10 @@ kable(college_means_data,
 
 ```
 
+```{r}
+
+```
+
 ## find outliers
 
 what is the percentage for outliers - say more than 50% - High Dew
