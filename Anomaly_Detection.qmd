@@ -39,10 +39,10 @@ ggplot(anomaly_data, aes(x = Percent.DEW)) +
 
 ```{r}
 anomaly_25 <- anomaly_data %>% 
-  filter(Percent.DEW>25)
+  filter(Percent.DEW>19)
 
 ggplot(anomaly_25, aes(x = Percent.DEW)) +
-  geom_histogram(binwidth = 3, fill = "blue", color = "black", alpha = 0.8) +
+  geom_histogram(binwidth = 2, fill = "blue", color = "black", alpha = 0.8) +
   labs(title = "Histogram of Percent DEW", x = "Percent DEW", y = "Frequency")
 ```
 
@@ -53,6 +53,13 @@ whisker and box plot by semester by college
 ```
 
 Summary of quartiles by semester and by college - what is the percentage for outliers - say more than 50% - High Dew
+
+```{r}
+ggplot(anomaly_data, aes(y = College, x = Percent.DEW)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Boxplot of Percent DEW by College",  x = "Percent DEW", y="")
+
+```
 
 pull a df of highest dew and highest pass
 
