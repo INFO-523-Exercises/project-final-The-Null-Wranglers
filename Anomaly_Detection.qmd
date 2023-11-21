@@ -8,7 +8,49 @@ editor: visual
 
 histogram of dew percent
 
+```{r}
+#| code-fold: true
+#| code-summary: "Load Libraries"
+
+suppressWarnings(library(tidyverse))
+library(knitr)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Read in Data"
+# read in data
+anomaly_data <- read.csv("data/study_data.csv")
+head(anomaly_data)
+```
+
+```{r}
+summary(anomaly_data$Percent.DEW)
+```
+
+```{r}
+ggplot(anomaly_data, aes(x = Percent.DEW)) +
+  geom_histogram(binwidth = 3, fill = "blue", color = "black", alpha = 0.8) +
+  labs(title = "Histogram of Percent DEW", x = "Percent DEW", y = "Frequency")
+```
+
+```{r}
+anomaly_25 <- anomaly_data %>% 
+  filter(Percent.DEW>25)
+
+ggplot(anomaly_25, aes(x = Percent.DEW)) +
+  geom_histogram(binwidth = 3, fill = "blue", color = "black", alpha = 0.8) +
+  labs(title = "Histogram of Percent DEW", x = "Percent DEW", y = "Frequency")
+```
+
 whisker and box plot by semester by college
+
+```{r}
+
+```
 
 Summary of quartiles by semester and by college - what is the percentage for outliers - say more than 50% - High Dew
 
