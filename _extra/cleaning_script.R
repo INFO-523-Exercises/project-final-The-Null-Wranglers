@@ -308,8 +308,8 @@ deduped_sy21 <- deduped_sy21 %>%
   mutate(Live_Online = case_when(Mode == "Live Onln" ~ 1,
                                  TRUE ~ 0))
 
-deduped_sy20 <- select(deduped_sy20, -c(Mode))
-deduped_sy21<- select(deduped_sy21, -c(Mode))
+#deduped_sy20 <- select(deduped_sy20, -c(Mode))
+#deduped_sy21<- select(deduped_sy21, -c(Mode))
 
 # create numeric value for session
 unique(deduped_sy20$Session)
@@ -373,11 +373,11 @@ deduped_sy21 <- deduped_sy21 %>%
 
 # now the dup identifiers need to be combined into one row
 combined_deduped_sy20 <- deduped_sy20 %>% 
-  group_by(Course.Identifier, P.F.Opt, Units)  %>% 
+  group_by(Course.Identifier, P.F.Opt, Units, Mode)  %>% 
   summarise(across(where(is.numeric), sum))
   
 combined_deduped_sy21 <- deduped_sy21 %>% 
-  group_by(Course.Identifier, P.F.Opt, Units) %>% 
+  group_by(Course.Identifier, P.F.Opt, Units, Mode) %>% 
   summarise(across(where(is.numeric), sum))
  
 length(unique(combined_deduped_sy20$Course.Identifier))

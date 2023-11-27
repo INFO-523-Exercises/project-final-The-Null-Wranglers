@@ -24,18 +24,23 @@ library(dplyr)
 #| code-summary: "Read in Data"
 # read in data
 anomaly_data <- read.csv("data/study_data.csv")
-head(anomaly_data)
 ```
+
+Examine quarts
 
 ```{r}
 summary(anomaly_data$Percent.DEW)
 ```
+
+explanation of quarts, so then we did
 
 ```{r}
 ggplot(anomaly_data, aes(x = Percent.DEW)) +
   geom_histogram(binwidth = 3, fill = "blue", color = "black", alpha = 0.8) +
   labs(title = "Histogram of Percent DEW", x = "Percent DEW", y = "Frequency")
 ```
+
+talk about skew and tail, so the we did
 
 ```{r}
 anomaly_25 <- anomaly_data %>% 
@@ -46,13 +51,9 @@ ggplot(anomaly_25, aes(x = Percent.DEW)) +
   labs(title = "Histogram of Percent DEW", x = "Percent DEW", y = "Frequency")
 ```
 
+talk top
+
 whisker and box plot by semester by college
-
-```{r}
-
-```
-
-Summary of quartiles by semester and by college - what is the percentage for outliers - say more than 50% - High Dew
 
 ```{r}
 ggplot(anomaly_data, aes(y = College, x = Percent.DEW)) +
@@ -60,6 +61,48 @@ ggplot(anomaly_data, aes(y = College, x = Percent.DEW)) +
   labs(title = "Boxplot of Percent DEW by College",  x = "Percent DEW", y="")
 
 ```
+
+```{r fig.height = 10, fig.width=12}
+ggplot(anomaly_data, aes(y = Mode, x = Percent.DEW)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Boxplot of Percent DEW by College",  x = "Percent DEW", y="")+
+  facet_wrap(~TERM_LD, ncol=2)
+```
+
+```{r , fig.height = 10, fig.width=12}
+ggplot(anomaly_data, aes(y = Mode, x = Percent.DEW)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Boxplot of Percent DEW by College",  x = "Percent DEW", y="")+
+  facet_wrap(~College, ncol=3)
+```
+
+```{r}
+# create column to label high dew percentage courses
+anomaly_data <- anomaly_data %>% 
+  mutate(DEW_Class = case_when(
+    Percent.DEW < 50 ~ 0,
+    Percent.DEW >= 50 ~ 1
+  ))
+```
+
+```{r}
+high_risk <- anomaly_data %>% 
+  filter(DEW_Class > 0)
+
+high_total <- aggregate(DEW_Class~College + TERM_LD, data=high_risk, sum)
+high_total <- high_total %>% pivot_wider(names_from = TERM_LD, values_from = DEW_Class)
+kable(high_total, caption =  "Total D, F, W Grade Counts for Each College per Semester")
+  
+```
+
+```{r}
+high_soc <- high_risk %>% filter(College == "College of Social & Behav Sci")
+high_total <- aggregate(DEW_Class~Department + TERM_LD, data=high_soc, sum)
+high_total <- high_total %>% pivot_wider(names_from = TERM_LD, values_from = DEW_Class)
+kable(high_total, caption =  "Total D, F, W Grade Counts for Each College per Semester")
+```
+
+Summary of quartiles by semester and by college - what is the percentage for outliers - say more than 50% - High Dew
 
 pull a df of highest dew and highest pass
 

@@ -184,14 +184,4 @@ kable(college_means_data,
 
 ```
 
-## find outliers
-
-what is the percentage for outliers - say more than 50% - High Dew
-
-class over 30 enrollment? lower
-
-class under 30 enrollment? upper
-
-per semester?
-
-What is the percentage for outliers - less than 5% - Low Dew
+## 
