@@ -1,0 +1,59 @@
+---
+title: "Regression"
+author: "Null Wranglers"
+editor: visual
+---
+
+```{r}
+#| code-fold: true
+#| code-summary: "Load Libraries"
+
+suppressWarnings(library(tidyverse))
+library(knitr)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+```
+
+narrow down to College of Soc & Behav Sciences
+
+```{r}
+#| code-fold: true
+#| code-summary: "Read in Data"
+# read in data
+regression_data <- read.csv("data/study_data.csv")
+
+
+```
+
+```{r}
+# filter to be just desired college
+regression_data <- regression_data %>% filter(College == "College of Social & Behav Sci")
+
+```
+
+Feature selection
+
+Correlation Analysis
+
+```{r}
+# both
+```
+
+Multi
+
+```{r}
+# both
+```
+
+Lasso
+
+```{r}
+# Rohit
+```
+
+Ridge
+
+```{r}
+# Kristi
+```
