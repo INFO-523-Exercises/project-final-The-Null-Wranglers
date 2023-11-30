@@ -19,7 +19,13 @@ pacman::p_load(colorblindr,
        ggpubr,
        ggridges,
        here,
-       tidyverse)
+       tidyverse,
+       tidymodels,
+       ranger,
+       randomForest,
+       glmnet,
+       gridExtra,
+       caret)
 ```
 
 narrow down to College of Soc & Behav Sciences
@@ -87,20 +93,243 @@ mode_regression_data %>% plot_correlate()
 session_regression_data %>% plot_correlate()
 ```
 
+```{r}
+# create a df with only the desired features
+model_data <- normalized_regression_data %>% select(c(DEW_COUNT,Total.Enroll, Percent.DEW, Full_Online, Second_Half_Session, First_Half_Session, Reg_Session))
+```
+
 Multi
 
 ```{r}
+# Perform multiple linear regression
+model <- lm(Percent.DEW ~ Second_Half_Session, data = model_data)
+# Summary of the regression model
+summary(model)
+```
+
+```{r}
+set.seed(1)
 # both
+# X will be full_online
+X <- model_data$Second_Half_Session
+# y will be the percent dew
+y <- model_data$Percent.DEW
+
+data <- tibble(X=X, y=y)
+
+split_obj <- initial_split(data, prop=.8)
+
+train_data <- training(split_obj)
+test_data <- testing(split_obj)
+
+# Extract X_train, X_test, y_train, y_test
+X_train <- train_data$X
+y_train <- train_data$y
+
+X_test <- test_data$X
+y_test <- test_data$y
+```
+
+```{r}
+# Create a linear regression model specification
+lin_reg_spec <- linear_reg() |> 
+  set_engine("lm")
+
+# Fit the model to the training data
+lin_reg_fit <- lin_reg_spec |> 
+  fit(y ~ X, data = train_data)
+```
+
+```{r}
+# Apply model to the test set
+y_pred_test <- predict(lin_reg_fit, new_data = test_data) |>
+  pull(.pred)
+```
+
+```{r}
+# Plotting true vs predicted values
+ggplot() + 
+  geom_point(aes(x = as.vector(y_test), y = y_pred_test), color = 'black') +
+  ggtitle('Comparing true and predicted values for test set') +
+  xlab('True values for y') +
+  ylab('Predicted values for y')
+```
+
+```{r}
+# Prepare data for yardstick evaluation
+eval_data <- tibble(
+  truth = as.vector(y_test),
+  estimate = y_pred_test
+)
+
+# Model evaluation
+rmse_value <- rmse(data = eval_data, truth = truth, estimate = estimate)
+r2_value <- rsq(eval_data, truth = truth, estimate = estimate)
+
+cat("Root mean squared error =", sprintf("%.4f", rmse_value$.estimate), "\n")
+```
+
+```{r}
+cat('R-squared =', sprintf("%.4f", r2_value$.estimate), "\n")
+```
+
+```{r}
+# Display model parameters
+coef_values <- coef(lin_reg_fit$fit)  # Extract coefficients
+slope <- coef_values["X"]
+intercept <- coef_values["(Intercept)"]
+
+cat("Slope =", slope, "\n")
+```
+
+```{r}
+cat("Intercept =", intercept, "\n")
+```
+
+```{r}
+### Step 4: Postprocessing
+
+# Plot outputs
+ggplot() +
+  geom_point(aes(x = as.vector(X_test), y = as.vector(y_test)), color = 'black') +
+  geom_line(aes(x = as.vector(X_test), y = y_pred_test), color = 'blue', linewidth = 1) +
+  ggtitle(sprintf('Predicted Function: y = %.2fX + %.2f', slope, intercept)) +
+  xlab('X') +
+  ylab('y')
 ```
 
 Lasso
 
 ```{r}
 # Rohit
+# Extract the predictor variables and response variable
+X <- model_data[, c("Full_Online", "Second_Half_Session")]
+y <- model_data$Percent.DEW
+# Standardize the predictor variables (optional but recommended for regularization)
+X <- scale(X)
+# Set up the Lasso regression model
+lasso_model <- cv.glmnet(X, y, alpha = 1)  # alpha = 1 for Lasso
+# Plot the cross-validated mean squared error (optional)
+plot(lasso_model)
+# Identify the optimal lambda (penalty parameter)
+best_lambda <- lasso_model$lambda.min
+cat("Best Lambda:", best_lambda, "\n")
+# Refit the model with the optimal lambda
+final_model <- glmnet(X, y, alpha = 1, lambda = best_lambda)
+# Display coefficients
+coef(final_model)
+```
+
+This show we can expect to see a 1.6% increase for full online and an additional 1.4 percent increase in second half.
+
+```{r}
+
+set.seed(123)  # for reproducibility
+index <- createDataPartition(model_data$Percent.DEW, p = 0.8, list = FALSE)
+train_data <- model_data[index, ]
+test_data <- model_data[-index, ]
+1:49
+# Train Lasso regression model on the training data
+lasso_model <- cv.glmnet(
+  x = as.matrix(train_data[, c("Full_Online", "Second_Half_Session")]),
+  y = train_data$Percent.DEW,
+  alpha = 1
+)
+# Identify the optimal lambda
+best_lambda <- lasso_model$lambda.min
+# Refit the model with the optimal lambda
+final_lasso_model <- glmnet(
+  x = as.matrix(train_data[, c("Full_Online",  "Second_Half_Session")]),
+  y = train_data$Percent.DEW,
+  alpha = 1,
+  lambda = best_lambda
+)
+1:50
+# Make predictions on the test data
+predictions <- predict(final_lasso_model, newx = as.matrix(test_data[, c("Full_Online",  "Second_Half_Session")]), s = best_lambda)
+# Evaluate the model's performance
+mse <- mean((predictions - test_data$Percent.DEW)^2)
+print(paste("Mean Squared Error on Test Data:", mse))
+```
+
+High mse indicates poor results in prediction
+
+```{r}
+# Extract the predictor variables and response variable
+X <- model_data[, c("Full_Online", "Second_Half_Session")]
+y <- model_data$Percent.DEW
+# Standardize the predictor variables (optional but recommended for regularization)
+X <- scale(X)
+# Set up a sequence of lambda values
+lambda_values <- 10^seq(10, -2, length = 100)
+# Train Lasso regression model with cross-validation
+lasso_model <- cv.glmnet(X, y, alpha = 1, lambda = lambda_values)
+# Plot training and testing errors
+plot(lasso_model$glmnet.fit, xvar = "lambda", label = TRUE, lwd = 2, col = c("blue", "red"), main = "Lasso Regression - Training and Testing Errors")
+legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lty = 1)
 ```
 
 Ridge
 
 ```{r}
-# Kristi
+# Extract the predictor variables and response variable
+X <- model_data[, c("Full_Online", "Second_Half_Session")]
+y <- model_data$Percent.DEW
+# Standardize the predictor variables (optional but recommended for regularization)
+X <- scale(X)
+# Set up the Ridge regression model
+ridge_model <- cv.glmnet(X, y, alpha = 0)  # alpha = 0 for Ridge
+# Plot the cross-validated mean squared error (optional)
+plot(ridge_model)
+# Identify the optimal lambda (penalty parameter)
+best_lambda <- ridge_model$lambda.min
+cat("Best Lambda:", best_lambda, "\n")
+# Refit the model with the optimal lambda
+final_ridge_model <- glmnet(X, y, alpha = 0, lambda = best_lambda)
+# Display coefficients
+coef(final_ridge_model)
+```
+
+```{r}
+set.seed(123)  # for reproducibility
+index <- createDataPartition(model_data$Percent.DEW, p = 0.8, list = FALSE)
+train_data <- model_data[index, ]
+test_data <- model_data[-index, ]
+1:49
+# Train Lasso regression model on the training data
+ridge_model <- cv.glmnet(
+  x = as.matrix(train_data[, c("Full_Online", "Second_Half_Session")]),
+  y = train_data$Percent.DEW,
+  alpha = 0
+)
+# Identify the optimal lambda
+best_lambda <- ridge_model$lambda.min
+# Refit the model with the optimal lambda
+final_ridge_model <- glmnet(
+  x = as.matrix(train_data[, c("Full_Online",  "Second_Half_Session")]),
+  y = train_data$Percent.DEW,
+  alpha = 0,
+  lambda = best_lambda
+)
+1:50
+# Make predictions on the test data
+predictions <- predict(final_ridge_model, newx = as.matrix(test_data[, c("Full_Online",  "Second_Half_Session")]), s = best_lambda)
+# Evaluate the model's performance
+mse <- mean((predictions - test_data$Percent.DEW)^2)
+print(paste("Mean Squared Error on Test Data:", mse))
+```
+
+```{r}
+# Extract the predictor variables and response variable
+X <- model_data[, c("Full_Online", "Second_Half_Session")]
+y <- model_data$Percent.DEW
+# Standardize the predictor variables (optional but recommended for regularization)
+X <- scale(X)
+# Set up a sequence of lambda values
+lambda_values <- 10^seq(10, -2, length = 100)
+# Train Lasso regression model with cross-validation
+lasso_model <- cv.glmnet(X, y, alpha = 0, lambda = lambda_values)
+# Plot training and testing errors
+plot(ridge_model$glmnet.fit, xvar = "lambda", label = TRUE, lwd = 2, col = c("blue", "red"), main = "Lasso Regression - Training and Testing Errors")
+legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lty = 1)
 ```
