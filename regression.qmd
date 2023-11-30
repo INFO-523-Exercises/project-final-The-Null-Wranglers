@@ -8,11 +8,18 @@ editor: visual
 #| code-fold: true
 #| code-summary: "Load Libraries"
 
-suppressWarnings(library(tidyverse))
-library(knitr)
-library(lubridate)
-library(ggplot2)
-library(dplyr)
+if (!require(pacman))
+  install.packages("pacman")
+
+pacman::p_load(colorblindr,
+       dlookr,
+       formattable,
+       GGally,
+       ggdist,
+       ggpubr,
+       ggridges,
+       here,
+       tidyverse)
 ```
 
 narrow down to College of Soc & Behav Sciences
@@ -30,6 +37,26 @@ regression_data <- read.csv("data/study_data.csv")
 # filter to be just desired college
 regression_data <- regression_data %>% filter(College == "College of Social & Behav Sci")
 
+# remove character columns
+numeric_regression_data <- select_if(regression_data, is.numeric)
+numeric_regression_data <- numeric_regression_data %>% select(-c(1:5))
+numeric_regression_data <- numeric_regression_data %>% select(-c(2:8, 10:14))
+
+```
+
+```{r}
+# normalized the data
+normalized_regression_data <- numeric_regression_data %>% mutate(across(c(Early_Morning:Other), .fns=~./Sections*100))
+
+```
+
+```{r}
+# create different df to look at different features
+general_regression_data <- numeric_regression_data %>% select(c(1, 3:6))
+time_regression_data <- normalized_regression_data %>% select(c(Percent.DEW, 7:12))
+day_regression_data <- normalized_regression_data %>% select(c(Percent.DEW, 13:17))
+mode_regression_data <- normalized_regression_data %>% select(Percent.DEW, In_Person, Full_Online, Hybrid, Live_Online)
+session_regression_data <- normalized_regression_data %>% select(Percent.DEW, 33:35)
 ```
 
 Feature selection
@@ -38,6 +65,26 @@ Correlation Analysis
 
 ```{r}
 # both
+correlate(general_regression_data) |>
+  formattable()
+```
+
+```{r}
+# Correlation matrix of numerical variables
+day_regression_data |>
+plot_correlate()
+```
+
+```{r}
+time_regression_data %>% plot_correlate()
+```
+
+```{r}
+mode_regression_data %>% plot_correlate()
+```
+
+```{r}
+session_regression_data %>% plot_correlate()
 ```
 
 Multi
