@@ -40,13 +40,16 @@ summary(tree_data)
 
 # as_tibble(tree_data)
 
+# Assuming 'tree_data' is your dataset
+library(rpart)
+library(rpart.plot)
 
-# Build a decision tree with default settings
+# Build a decision tree with default settings using magrittr pipe
+tree_default <- tree_data %>%
+  rpart(DEW_COUNT ~ ., data = .)
 
-tree_default <- tree_data |>
-
-  rpart( DEW_COUNT~., data = _)
-
-
-rpart.plot(tree_default)
+# Plot the decision tree using rpart.plot and save it as a PNG file
+png("images/decision_tree.png", width = 800, height = 600)
+rpart.plot(tree_default, box.palette = "auto", shadow.col = "gray", nn = TRUE)
+dev.off()
 ```
