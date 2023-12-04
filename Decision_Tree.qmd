@@ -1,0 +1,52 @@
+---
+title: "Decision_Tree"
+editor: visual
+---
+
+```{r}
+
+library(rpart)
+library(rpart.plot)
+
+data <- read.csv("data/study_data.csv")
+
+filtered_data1 <- data %>% filter(Sections <= 1)
+
+
+# Change values in the "DEW_COUNT" column
+
+filtered_data1$DEW_COUNT[filtered_data1$Percent.DEW <= 12.2] <- 'Low'
+
+filtered_data1$DEW_COUNT[filtered_data1$Percent.DEW > 12.2] <- 'High'
+
+
+filtered_data1$DEW_COUNT <- as.factor(filtered_data1$DEW_COUNT)
+
+
+tree_data <- select(filtered_data1, DEW_COUNT, Full_Online, Hybrid, Live_Online, Reg_Session, Monday,         Tuesday, Wednesday, Thursday, Friday, Saturday,              Sunday, Early_Morning, Mid_Morning, Early_Afternoon, Mid_Afternoon, Evening, Asynchronous  )
+
+
+col_names <- c("Full_Online", "Hybrid", "Live_Online", "Reg_Session", "Monday",         "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",              "Sunday", "Early_Morning", "Mid_Morning", "Early_Afternoon", "Mid_Afternoon", "Evening", "Asynchronous" )
+
+
+tree_data[col_names] <- sapply(tree_data[col_names], as.logical)
+
+# Check for missing values in the dataset
+
+missing_values <- colSums(is.na(tree_data))
+
+summary(tree_data)
+
+
+# as_tibble(tree_data)
+
+
+# Build a decision tree with default settings
+
+tree_default <- tree_data |>
+
+  rpart( DEW_COUNT~., data = _)
+
+
+rpart.plot(tree_default)
+```

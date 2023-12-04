@@ -1,7 +1,7 @@
 ---
-title: "Descriptive analysis of grade outcomes"
+title: "Descriptive Analysis of Grade Outcomes"
 subtitle: "INFO 523 - Fall 2023 - Project Final"
-author: "Kristi Manasil, Dong Chen, Utkarsha PAtil, Anjani Sowmyabollapragada, Rohit Hemaraja"
+author: "Kristi Manasil, Dong Chen, Utkarsha Patil, Anjani Sowmya Bollapragada, Rohit Hemaraja"
 title-slide-attributes:
   data-background-image: images/watercolour_sys02_img34_teacup-ocean.jpg
   data-background-size: stretch
@@ -52,17 +52,16 @@ mtcars$speed <- mtcars$hp / mtcars$wt
 data("penguins")
 ```
 
-# Using Quarto for presentations
 
-## Quarto
+## Quarto - Introduction - Dong
 
--   The presentation is created using the Quarto CLI
+-   Research Questions
 
--   `##` sets the start of a new slide
+-   Datasets
 
-## Layouts
+## Layouts - EDA - Dong
 
-You can use plain text
+You can use plain text - one plot about why we narrow down the data. Why just top 5 colleges, any one mean enrollment table.
 
 ::: columns
 ::: {.column width="40%"}
@@ -80,7 +79,17 @@ or in two columns
 
 -   this
 
-## Code
+## Layouts - Anomaly Detection - Kristi
+
+## Layouts - Time Series Analysis - Anjani
+
+
+
+## Layouts - Decision Tree - Utkarsha
+
+## Layouts - Regression - Rohit
+
+## Code - Add our code here
 
 ```{r, echo=FALSE}
 model <- lm(mpg ~ speed, data = mtcars) 
@@ -100,7 +109,10 @@ penguins |>
   geom_point()
 ```
 
-## Plot and text
+## Plot and text - Time Series Analysis
+
+
+Time series analysis is a statistical method used to analyze and interpret sequential data points collected and ordered over time. It involves examining patterns, trends, and behaviors within the dataset to understand how the data evolves and changes across different time intervals. (add any image in the background)
 
 ::: columns
 ::: {.column width="50%"}
