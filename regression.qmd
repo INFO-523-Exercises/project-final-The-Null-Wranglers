@@ -70,15 +70,33 @@ Feature selection
 Correlation Analysis
 
 ```{r}
-# both
-correlate(general_regression_data) |>
+
+library(dplyr)
+library(formattable)
+library(webshot)
+library(htmlwidgets)
+webshot::install_phantomjs()
+
+# Create a table and format it
+ correlate(general_regression_data) %>%
   formattable()
+
+# Save the formatted table as an HTML file
+htmlwidgets::saveWidget(correlate_table, file = "images/correlate_table.html")
+
+# Capture the HTML file as an image using webshot
+webshot::webshot("images/correlate_table.html", file = "images/correlate_table.png")
+
+conflicts()
 ```
 
 ```{r}
 # Correlation matrix of numerical variables
-day_regression_data |>
+plot_coorelate <- day_regression_data |>
 plot_correlate()
+# Save the plot as a PNG file
+ggsave("images/correlation.png", plot = plot_coorelate)
+
 ```
 
 ```{r}
