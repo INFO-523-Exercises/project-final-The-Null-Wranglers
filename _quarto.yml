@@ -16,6 +16,16 @@ website:
         href: presentation.qmd
       - text: About
         href: about.qmd
+      - text: EDA
+        href: EDA_Grade_Outcomes.qmd
+      - text: Anomaly Detection
+        href: Anomaly_Detection.qmd
+      - text: Time Series
+        href: Time_Series_Analysis.qmd
+      - text: Decision Tree
+        href: Decision_Tree.qmd
+      - text: Regression
+        href: regression.qmd
 
 format:
   html:
