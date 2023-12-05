@@ -100,8 +100,8 @@ ggsave("images/mode_regression_data_table.png", plot = mode_regression_data_tabl
 ```
 
 ```{r}
-session_regression_data-table<- session_regression_data %>% plot_correlate()
-ggsave("images/msession_regression_data-table.png", plot = session_regression_data-table)
+session_regression_data_table<- session_regression_data %>% plot_correlate()
+ggsave("images/msession_regression_data-table.png", plot = session_regression_data_table)
 ```
 
 ```{r}
