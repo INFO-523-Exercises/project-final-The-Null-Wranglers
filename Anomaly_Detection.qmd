@@ -4,11 +4,9 @@ author: "Null Wranglers"
 editor: visual
 ---
 
-## find outliers
+# Anomaly Detection
 
-histogram of dew percent
-
-```{r}
+```{r message=FALSE, output=FALSE}
 #| code-fold: true
 #| code-summary: "Load Libraries"
 
@@ -19,93 +17,134 @@ library(ggplot2)
 library(dplyr)
 ```
 
-```{r}
+```{r message=FALSE, output=FALSE}
 #| code-fold: true
 #| code-summary: "Read in Data"
 # read in data
 anomaly_data <- read.csv("data/study_data.csv")
 ```
 
-Examine quarts
+## Introduction
+
+In order to identify patterns or trends in the Grade Outcomes, we wanted to better understand the current anomalies in the data. We focused on trying to identify outliers that had a high value of poor grade outcomes. We decided to base this anomaly detection on the percentage of D, E, or W grades for a course. This decision was made so that high enrollment courses, such as English 101 with enrollment over 3500, would not further skew the data. We began by examining the quartiles for the D.E.W. Percentage.
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Quartiles for DEW Percents"
 summary(anomaly_data$Percent.DEW)
 ```
 
-explanation of quarts, so then we did
+Here we verify that mean value is the 12.55% as we found in the initial EDA. We also see where the cut off values are for the quartiles. The first quartile or bottom 25% of the data are DEW percent values of less than 4%. The second quartile contains the DEW percents that range from 4% to 10.25%. The third quartile ranges from 10.25% to 18.2%. And the final quartile is all DEW percents of greater than 18.2%. This Histogram shows the distribution of these quartiles.
+
+## Histograms of DEW Percentages
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Histogram of DEW Percentage"
 ggplot(anomaly_data, aes(x = Percent.DEW)) +
   geom_histogram(binwidth = 3, fill = "blue", color = "black", alpha = 0.8) +
-  labs(title = "Histogram of Percent DEW", x = "Percent DEW", y = "Frequency")
+  labs(title = "Histogram of DEW Percent", x = "Percent DEW", y = "Frequency")
 ```
 
-talk about skew and tail, so the we did
+In the percentages of DEW for courses, we anticipated to see the data to be skewed to left as 75% of the data has a DEW percent is below 18.2%. This is clearly displayed in the above histogram. In the Histogram below we include only the top quartile of DEW percentages. This histogram allows us to more clearly see the frequency of DEW percentages over 30%.
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Histogram of Only Top 25% of DEW"
+
+# create new df of the top quartile
 anomaly_25 <- anomaly_data %>% 
   filter(Percent.DEW>19)
 
 ggplot(anomaly_25, aes(x = Percent.DEW)) +
   geom_histogram(binwidth = 2, fill = "blue", color = "black", alpha = 0.8) +
-  labs(title = "Histogram of Percent DEW", x = "Percent DEW", y = "Frequency")
+  labs(title = "Histogram of Only Top 25% of DEW Percent", x = "Percent DEW", y = "Frequency")
 ```
 
-talk top
+## Box Plots of DEW Percentages
 
-whisker and box plot by semester by college
+The next step we took was to create box and whisker plots. The first plot seen below shows that the top 5 colleges DEW percentage. We can clearly see outliers for all colleges with the most outliers occurring in the College of Social and Behavioral Sciences.
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Box Plot of DEW Percent"
 ggplot(anomaly_data, aes(y = College, x = Percent.DEW)) +
   geom_boxplot(fill = "lightblue", color = "black") +
-  labs(title = "Boxplot of Percent DEW by College",  x = "Percent DEW", y="")
+  labs(title = "Boxplot of Percent DEW",  x = "Percent DEW", y="")
 
 ```
 
-```{r fig.height = 10, fig.width=12}
+The next plot shows how DEW Percentage for each mode for courses. The outliers seem to be evenly distributed across the types of different modes for courses and not isolated to a specific mode.
+
+```{r fig.height = 10, fig.width=10}
+#| code-fold: true
+#| code-summary: "Box Plot of DEW Percent by Term"
 ggplot(anomaly_data, aes(y = Mode, x = Percent.DEW)) +
   geom_boxplot(fill = "lightblue", color = "black") +
-  labs(title = "Boxplot of Percent DEW by College",  x = "Percent DEW", y="")+
-  facet_wrap(~TERM_LD, ncol=2)
+  labs(title = "Boxplot of Percent DEW by Term",  x = "Percent DEW", y="")+
+    facet_wrap(~TERM_LD, ncol=2)
 ```
 
-```{r , fig.height = 10, fig.width=12}
+We confirmed this distribution by the below box and whisker plot that shows the mode by College. Once again the outliers are not isolated to a certain mode but fairly evenly distributed across the modes in all colleges.
+
+```{r , fig.height = 10, fig.width=10}
+#| code-fold: true
+#| code-summary: "Box Plot of DEW Percent by College"
 ggplot(anomaly_data, aes(y = Mode, x = Percent.DEW)) +
   geom_boxplot(fill = "lightblue", color = "black") +
   labs(title = "Boxplot of Percent DEW by College",  x = "Percent DEW", y="")+
   facet_wrap(~College, ncol=3)
 ```
 
+After completing these bow plots, we decided to add a classification column that labeled any DEW percentage over 30% as High and all other percentages as Low. We determined this 30% cut off by using the box plots from above that showed outliers in all colleges and modes occurred above the 30% threshold. This creates a new data set with 528 observations. This mean that about 8% of courses from the original data are being considered for further analysis.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Create Classification"
 # create column to label high dew percentage courses
 anomaly_data <- anomaly_data %>% 
   mutate(DEW_Class = case_when(
-    Percent.DEW < 50 ~ 0,
-    Percent.DEW >= 50 ~ 1
+    Percent.DEW < 30 ~ 0,
+    Percent.DEW >= 30 ~ 1
   ))
 ```
 
-```{r}
+```{r fig.height=6}
+#| code-fold: true
+#| code-summary: "Table and Box Plot of High DEW Percentage Courses"
 high_risk <- anomaly_data %>% 
   filter(DEW_Class > 0)
 
+ggplot(high_risk, aes(y = College, x = Percent.DEW)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Boxplot of Percent DEW",  x = "Percent DEW", y="")
+
 high_total <- aggregate(DEW_Class~College + TERM_LD, data=high_risk, sum)
 high_total <- high_total %>% pivot_wider(names_from = TERM_LD, values_from = DEW_Class)
-kable(high_total, caption =  "Total D, F, W Grade Counts for Each College per Semester")
+kable(high_total, caption =  "Total High Risk Courses for Each College per Semester")
   
 ```
 
+This table shows that the most outliers defined as courses over 30% DEW percentage occurred in the College of Social and Behavioral Science. We can also see that the this college had the highest mean value in mean value in the data. The number of courses for this college and the College of Humanities stayed reasonable steady during the pandemic. However, we saw decreases in outliers for the rest of the colleges during the first semester of the pandemic followed by an increase to above pre-pandemic levels in the second semester. Most notably the College of Science dropped to just 11 High DEW percentage courses in the Spring of 2020 but spiked to 49 in the next semester. After reviewing this table, we decided to isolate the College of Social and Behavioral Sciences since the most occurrence of High DEW percentage courses. The below table shows the distribution of these courses in each department within this college.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Table of High Risk Courses For College of Social and Behavioral Sciences by Department and Term"
 high_soc <- high_risk %>% filter(College == "College of Social & Behav Sci")
 high_total <- aggregate(DEW_Class~Department + TERM_LD, data=high_soc, sum)
 high_total <- high_total %>% pivot_wider(names_from = TERM_LD, values_from = DEW_Class)
-kable(high_total, caption =  "Total D, F, W Grade Counts for Each College per Semester")
+kable(high_total, caption =  "Total High Risk Course for College of Social and Behavioral Sciences per Semester")
 ```
 
-Summary of quartiles by semester and by college - what is the percentage for outliers - say more than 50% - High Dew
+This table shows that the departments of History and Philosophy consistently have the most numbers of High DEW percentage courses across the four semesters being analyzed.
 
-pull a df of highest dew and highest pass
+```{r}
+#| code-fold: true
+#| code-summary: "Table of High Risk Courses For College of Social and Behavioral Sciences by Department and Mode"
+high_soc <- high_risk %>% filter(College == "College of Social & Behav Sci")
+high_total <- aggregate(DEW_Class~Department + Mode, data=high_soc, sum)
+high_total <- high_total %>% pivot_wider(names_from = Mode, values_from = DEW_Class)
+kable(high_total, caption =  "Total High Risk Course for College of Social and Behavioral Sciences per Semester")
+```
 
-count of how from each college in new df scatter plot colored/clustered by college
-
-add a label either high or low (high being over 55% dew percentage) - scatter plot courses and color by label)
+This table shows that most High DEW percentage courses are occurring in Fully Online courses. However, In Person courses in the departments of Philosophy and the School of Geography,Developmental, and Environmental Studies also showed comparable number of High DEW percentage courses to Fully Online courses. While the School of Anthropology saw their highest DEW percentage courses for the Live Online mode.

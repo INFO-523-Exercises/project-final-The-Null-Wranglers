@@ -11,6 +11,7 @@ suppressWarnings(library(tidyverse))
 library(knitr)
 library(lubridate)
 library(ggplot2)
+library(ggthemes)
 ```
 
 ## Dataset Setup
@@ -96,7 +97,15 @@ dew_data %>%
   group_by(TERM_LD) %>% 
   ggplot(aes( x = TERM_LD,
               fill = TERM_LD))+
-  geom_bar(position = "dodge")
+  geom_bar(position = "dodge")+
+  labs(title = "Comparisons of Student Enrollment",
+                                    x = "Semester",
+                                    y = "Total Enrollment")+
+  theme_minimal()+
+  theme_linedraw()+
+  theme(legend.position = "bottom", plot.title=element_text(size=30), axis.text = element_text(size=20),legend.text = element_text(size = 15),
+        legend.title = element_text(size = 15), strip.text.x = element_text(size = 30),panel.grid = element_blank())+
+  scale_fill_colorblind()
 ```
 
 ```{r}

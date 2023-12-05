@@ -126,18 +126,18 @@ Visualiaze in bar
 library(ggplot2)
 
 # Define the order of variables
-variable_order <- c( "Pass Grade Count", "D Grade Count", "Fail Grade Count", "Withdraw Grade Count", "DEW Count")
+variable_order <- c( "Percent.Passed", "Percent.D.Grade", "Percent.E.Grade", "Percent.W.Grade", "Percent.DEW")
 
 # Creating a data frame with the means
 means_data <- data.frame(
   Variable = factor(variable_order, levels = variable_order),
   Mean_Value = c(
     #mean(clean_dew_data$Total.Student.Count), Write a note on this
-    mean(dew_data$PASS_GRADE_COUNT),
-    mean(dew_data$D_GRADE_COUNT),
-    mean(dew_data$FAIL_GRADE_COUNT),
-    mean(dew_data$WITHDRAW_GRADE_COUNT),
-    mean(dew_data$DEW_COUNT)
+    mean(dew_data$Percent.Passed),
+    mean(dew_data$Percent.D.Grade),
+    mean(dew_data$Percent.E.Grade),
+    mean(dew_data$Percent.W.Grade),
+    mean(dew_data$Percent.DEW)
   )
 )
 
@@ -145,11 +145,12 @@ means_data <- data.frame(
 ggplot(means_data, aes(x = Variable, y = Mean_Value, fill = Variable)) +
   geom_bar(stat = "identity") +
   geom_text(aes(label = round(Mean_Value, 2)), vjust = -0.5, size = 3) +  # Add text labels
-  labs(title = "Mean of Percentages of Pass grade along with DEW Grades",
+  labs(title = "Mean of Percentages of Pass and D.E.W Grades",
        x = "Variables",
        y = "Mean Value") +
-  theme_minimal()
-
+  theme_minimal()+
+  theme_linedraw()+
+  theme(legend.position = "bottom", panel.grid = element_blank())
 ```
 
 ```{r}
