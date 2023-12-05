@@ -96,6 +96,8 @@ ggplot(anomaly_data, aes(y = Mode, x = Percent.DEW)) +
   facet_wrap(~College, ncol=3)
 ```
 
+## Tables of High DEW Percent Courses
+
 After completing these bow plots, we decided to add a classification column that labeled any DEW percentage over 30% as High and all other percentages as Low. We determined this 30% cut off by using the box plots from above that showed outliers in all colleges and modes occurred above the 30% threshold. This creates a new data set with 528 observations. This mean that about 8% of courses from the original data are being considered for further analysis.
 
 ```{r}

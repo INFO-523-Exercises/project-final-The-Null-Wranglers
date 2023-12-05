@@ -3,6 +3,17 @@ title: "Decision_Tree"
 editor: visual
 ---
 
+```{r message=FALSE, output=FALSE}
+#| code-fold: true
+#| code-summary: "Load Libraries"
+
+suppressWarnings(library(tidyverse))
+library(knitr)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+```
+
 ```{r}
 
 library(rpart)
