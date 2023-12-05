@@ -10,168 +10,173 @@ title-slide-attributes:
 format:
   revealjs:
     theme:  ['data/customtheming.scss']
-  
 editor: visual
 execute:
   echo: false
 ---
-
 ```{r}
 #| label: load-packages
 #| include: false
-
 # Load packages here
 pacman::p_load(tidymodels,
                tidyverse)
-
 ```
-
 ```{r}
 #| label: setup
 #| include: false
-
 # Plot theme
 ggplot2::theme_set(ggplot2::theme_minimal(base_size = 11))
-
 # For better figure resolution
 knitr::opts_chunk$set(
-  fig.retina = 3, 
-  dpi = 300, 
-  fig.width = 6, 
-  fig.asp = 0.618 
+  fig.retina = 3,
+  dpi = 300,
+  fig.width = 6,
+  fig.asp = 0.618
   )
 ```
-
 ```{r}
 #| label: load-data
 #| include: false
 # Load data here
 data(mtcars)
 mtcars$speed <- mtcars$hp / mtcars$wt
-
 data("penguins")
 ```
-
-
-## Quarto - Introduction - Dong
-
+# Introduction
 -   Research Questions
-
 -   Datasets
-
-## Layouts - EDA - Dong
-
-You can use plain text - one plot about why we narrow down the data. Why just top 5 colleges, any one mean enrollment table.
-
-::: columns
-::: {.column width="40%"}
--   or bullet points[^1]
-:::
-
-::: {.column width="60%"}
-or in two columns
-:::
-:::
-
-[^1]: And add footnotes
-
--   like
-
--   this
-
-## Layouts - Anomaly Detection - Kristi
-
-## Layouts - Time Series Analysis - Anjani
-
-
-
-## Layouts - Decision Tree - Utkarsha
-
-## Layouts - Regression - Rohit
-
-## Code - Add our code here
-
-```{r, echo=FALSE}
-model <- lm(mpg ~ speed, data = mtcars) 
-
-model |> tidy()
-
-model |> glance()
-
-```
-
-## Plots
-
-```{r}
-penguins |>
-  mutate(species = ifelse(species == "Adelie", "Adelie", "Other")) |>
-  ggplot(aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
-  geom_point()
-```
-
-## Plot and text - Time Series Analysis
-
-
-Time series analysis is a statistical method used to analyze and interpret sequential data points collected and ordered over time. It involves examining patterns, trends, and behaviors within the dataset to understand how the data evolves and changes across different time intervals. (add any image in the background)
-
-::: columns
-::: {.column width="50%"}
--   Some text
-
--   goes here
-:::
-
-::: {.column width="50%"}
-```{r, warning=FALSE, fig.width=5.5}
-penguins |>
-  ggplot(aes(x = bill_length_mm, y = species, color = species)) +
-  geom_boxplot(linewidth = 0.75,
-               outlier.size = 2.5) +
-  theme_minimal(base_size = 15) +
-  theme(legend.key.size = unit(0.8, "cm"))
-```
-:::
-:::
-
-# A new section...
-
+# EDA
+You can use plain text - one plot about why we narrow down the data. Why just top 5 colleges, any one mean enrollment table. ::: columns ::: {.column width="40%"} - or bullet points\[\^1\] ::: ::: {.column width="60%"} or in two columns ::: ::: \[\^1\]: And add footnotes - like - this
+## Code
 ## Tables
-
+## Plots (Images)
+# Anomaly Detection
+## Code
+## Tables
+## Plots (Images)
+# Time Series Analysis
+*Time series analysis is a statistical method used to analyze and interpret sequential data points collected and ordered over time. It involves examining patterns, trends, and behaviors within the dataset to understand how the data evolves and changes across different time intervals.*
+## Code
+``` r
+dew_data <- read.csv("data/DEW Rates.csv")
+# Filter the data for the specified colleges and TERM_LD values
+selected_colleges <- c('College of Agric and Life Sci', 'College of Humanities','College of Science', 'College of Social & Behav Sci', 'Eller College of Management')
+selected_terms <- c('Fall 2018', 'Spring 2019', 'Fall 2019', 'Spring 2020', 'Fall 2020', 'Spring 2021')
+filtered_data <- dew_data %>%
+  filter(College %in% selected_colleges & TERM_LD %in% selected_terms)
+#DEW count (K) for 5 colleges over semesters - Utkarsha
+# Aggregate the data
+aggregated_data <- filtered_data %>%
+  group_by(College, TERM_LD) %>%
+  summarise(DEW_COUNT = sum(DEW_COUNT))
+# Convert TERM_LD to a factor with a specific order
+filtered_data$TERM_LD <- factor(filtered_data$TERM_LD, levels = selected_terms)
+# Save the plot to a folder named "images"
+plot <- ggplot(aggregated_data, aes(x = factor(TERM_LD, levels = selected_terms), y = DEW_COUNT, color = College, group = College)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Total DEW Count Over Time",
+    x = "Term",
+    y = "Total DEW Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# Save the plot as a PNG file
+ggsave("images/TSA1.png", plot = plot)
+#DEW counts (F) based on the division level over semesters
+# Rename the 'course.level' column to 'Course_Level'
+filtered_data <- filtered_data %>%
+  rename(Course_Level =     Course.Level)
+grouped_data <- filtered_data %>%
+  group_by(College, TERM_LD, Course_Level)
+# Convert TERM_LD to factor with ordered levels
+grouped_data$TERM_LD <- factor(
+  grouped_data$TERM_LD,
+  levels = selected_terms,
+  ordered = TRUE
+)
+# Summarize the grouped data to get the desired summary statistics
+summary <- grouped_data %>%
+  summarise(
+    count = n()
+  )
+# Plotting the facet line graph
+plot2 <- ggplot(summary, aes(x = TERM_LD, y = count, group = Course_Level, color = Course_Level)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~College, scales = "free") +
+  labs(
+    title = "Count of Course Levels over Terms",
+    x = "Term",
+    y = "Count"
+  ) +
+  theme_minimal()+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# Save the plot as a PNG file
+ggsave("images/TSA2.png", plot = plot2)
+study_data<- study_data%>%
+  filter(College == "College of Agric and Life Sci" | College ==  "Eller College of Management"|  College == "College of Social & Behav Sci"| College == "College of Science"|  College ==  "College of Humanities")
+# Reshape data and calculate mean enrollment
+long_data <- study_data%>%
+  pivot_longer(
+    cols = Laboratory:Practicum,
+    names_to = "TeachingFormat",
+    values_to = "Enrollment"
+  ) %>%
+  group_by(College, TeachingFormat) %>%
+  summarise(MeanEnrollment = mean(Enrollment, na.rm = TRUE))
+# Create a plot with facets for each college, adding colors for each TeachingFormat
+plot3 <- ggplot(long_data, aes(x = TeachingFormat, y = MeanEnrollment, fill = TeachingFormat)) +
+  geom_bar(stat = "identity") +
+  facet_wrap(~ College) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set1")
+# Save the plot as a PNG file
+ggsave("images/TSA3.png", plot = plot3)
+```
+## Tables
+## Plot 1
+![](images/TSA1.png){width=100%}
+## Plot 2
+![](images/TSA2.png){width=100%}
+## Plot 3
+![](images/TSA3.png){width=100%}
+# Decision Tree
+## Code
+``` r
+filtered_data1 <- data %>% filter(Sections <= 1)
+filtered_data1$DEW_COUNT[filtered_data1$Percent.DEW <= 12.2] <- 'Low'
+filtered_data1$DEW_COUNT[filtered_data1$Percent.DEW > 12.2] <- 'High'
+filtered_data1$DEW_COUNT <- as.factor(filtered_data1$DEW_COUNT)
+tree_data <- select(filtered_data1, DEW_COUNT, Full_Online, Hybrid, Live_Online, Reg_Session, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday, Early_Morning, Mid_Morning, Early_Afternoon, Mid_Afternoon, Evening, Asynchronous )
+col_names <- c("Full_Online", "Hybrid", "Live_Online", "Reg_Session", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Early_Morning", "Mid_Morning", "Early_Afternoon", "Mid_Afternoon", "Evening", "Asynchronous" )
+tree_data[col_names] <- sapply(tree_data[col_names], as.logical)
+tree_default <- tree_data |>
+rpart( DEW_COUNT~., data = _)
+rpart.plot(tree_default)
+```
+## Tables
+## Plots (Images)
+# Regression
+## Code
+## Tables
+## Plots (Images)
+# Tables
 If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
-
 ```{r}
-penguins |> 
+penguins |>
   head() |>
   kableExtra::kable() |>
   kableExtra::kable_styling()
 ```
-
-## Images
-
+# Images
 ![Image credit: Danielle Navarro, Percolate.](images/watercolour_sys02_img34_teacup-ocean.png){fig-align="center" width="500"}
-
-## Math Expressions {.smaller}
-
-You can write LaTeX math expressions inside a pair of dollar signs, e.g. \$\\alpha+\\beta\$ renders $\alpha + \beta$. You can use the display style with double dollar signs:
-
-```         
+# Math Expressions
+{.smaller} You can write LaTeX math expressions inside a pair of dollar signs, e.g. \$\\alpha+\\beta\$ renders $\alpha + \beta$. You can use the display style with double dollar signs:
+```
 $$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
 ```
-
 $$
 \bar{X}=\frac{1}{n}\sum_{i=1}^nX_i
-$$
-
-Limitations:
-
-1.  The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character;
-
-2.  There should not be spaces after the opening `$` or before the closing `$`.
-
-# Wrap up
-
-## Feeling adventurous?
-
--   You are welcomed to use the default styling of the slides. In fact, that's what I expect majority of you will do. You will differentiate yourself with the content of your presentation.
-
--   But some of you might want to play around with slide styling. Some solutions for this can be found at https://quarto.org/docs/presentations/revealjs.
+$$ Limitations: 1. The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character; 2. There should not be spaces after the opening `$` or before the closing `$`. \# Wrap up \## Feeling adventurous? - You are welcomed to use the default styling of the slides. In fact, that's what I expect majority of you will do. You will differentiate yourself with the content of your presentation. - But some of you might want to play around with slide styling. Some solutions for this can be found at https://quarto.org/docs/presentations/revealjs.
