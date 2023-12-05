@@ -174,7 +174,7 @@ True_Predicted_table <-ggplot() +
   xlab('True values for y') +
   ylab('Predicted values for y')
 
-ggsave("image/True_Predicted_table.png", plot=True_Predicted_table)
+ggsave("images/True_Predicted_table.png", plot=True_Predicted_table)
 ```
 
 ```{r}
@@ -219,7 +219,7 @@ Predicted_Function <-ggplot() +
   xlab('X') +
   ylab('y')
 
-ggsave("image/Predicted_Function.png", plot=Predicted_Function)
+ggsave("images/Predicted_Function.png", plot=Predicted_Function)
 
 ```
 

@@ -38,12 +38,15 @@ Here we verify that mean value is the 12.55% as we found in the initial EDA. We 
 
 ## Histograms of DEW Percentages
 
-```{r}
+```{r message=FALSE}
 #| code-fold: true
 #| code-summary: "Histogram of DEW Percentage"
-ggplot(anomaly_data, aes(x = Percent.DEW)) +
+g1 <- ggplot(anomaly_data, aes(x = Percent.DEW)) +
   geom_histogram(binwidth = 3, fill = "blue", color = "black", alpha = 0.8) +
   labs(title = "Histogram of DEW Percent", x = "Percent DEW", y = "Frequency")
+
+ggsave("images/g1.png", plot=g1)
+g1
 ```
 
 In the percentages of DEW for courses, we anticipated to see the data to be skewed to left as 75% of the data has a DEW percent is below 18.2%. This is clearly displayed in the above histogram. In the Histogram below we include only the top quartile of DEW percentages. This histogram allows us to more clearly see the frequency of DEW percentages over 30%.
@@ -96,7 +99,9 @@ ggplot(anomaly_data, aes(y = Mode, x = Percent.DEW)) +
   facet_wrap(~College, ncol=3)
 ```
 
-## Tables of High DEW Percent Courses
+``` r
+Tables of High DEW Percent Courses
+```
 
 After completing these bow plots, we decided to add a classification column that labeled any DEW percentage over 30% as High and all other percentages as Low. We determined this 30% cut off by using the box plots from above that showed outliers in all colleges and modes occurred above the 30% threshold. This creates a new data set with 528 observations. This mean that about 8% of courses from the original data are being considered for further analysis.
 

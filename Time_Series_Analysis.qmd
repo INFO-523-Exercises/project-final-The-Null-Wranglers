@@ -100,7 +100,7 @@ ggplot(aggregated_data, aes(x = TERM_LD, group = College)) +
   geom_point(aes(y = D_GRADE_COUNT, color = "D_GRADE_COUNT"), size = 2) +
   geom_point(aes(y = FAIL_GRADE_COUNT, color = "FAIL_GRADE_COUNT"), size = 2) +
   geom_point(aes(y = WITHDRAW_GRADE_COUNT, color = "WITHDRAW_GRADE_COUNT"), size = 2) +
-  labs(title = "Total DEW Count Over Time",
+  labs(title = "",
        x = "Term",
        y = "Total Count",
        color = "Category") +
@@ -141,7 +141,7 @@ plot2 <- ggplot(summary, aes(x = TERM_LD, y = count, group = Course_Level, color
   geom_point() +
   facet_wrap(~College, scales = "free") +
   labs(
-    title = "Count of Course Levels over Terms",
+    title = "",
     x = "Term",
     y = "Count"
   ) +
@@ -152,6 +152,8 @@ plot2 <- ggplot(summary, aes(x = TERM_LD, y = count, group = Course_Level, color
 ggsave("images/TSA2.png", plot = plot2)
 
 ```
+
+
 ```{r}
 study_data <- read.csv("data/study_data.csv")
 
@@ -279,7 +281,7 @@ study_data%>%
   geom_bar(position = "dodge")
 ```
 
-```{r, fig.width=14, fig.height = 14}
+```{r, fig.width=18, fig.height = 14}
 #3 Mean student enrollment in different types of teaching format (columns AU to BB) by colleges - Dong
 
 # Reshape data and calculate mean enrollment
@@ -296,7 +298,7 @@ long_data <- study_data%>%
 plot3 <- ggplot(long_data, aes(x = TeachingFormat, y = MeanEnrollment, fill = TeachingFormat)) +
   geom_bar(stat = "identity") +
   facet_wrap(~ College) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size=4)) +
   scale_fill_brewer(palette = "Set1")  
 
 # Save the plot as a PNG file
