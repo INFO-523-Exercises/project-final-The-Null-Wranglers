@@ -63,13 +63,48 @@ You can use plain text - one plot about why we narrow down the data. Why just to
 
 # Anomaly Detection
 
-## Code
+-   In order to identify patterns or trends in the Grade Outcomes, we wanted to better understand the current anomalies in the data. We focused on trying to identify outliers that had a high value of poor grade outcomes. We decided to base this anomaly detection on the percentage of D, E, or W grades for a course. This decision was made so that high enrollment courses, such as English 101 with enrollment over 3500, would not further skew the data. We began by examining the quartiles for the D.E.W. Percentage.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Quartiles for DEW Percents"
+# read in data
+anomaly_data <- read.csv("data/study_data.csv")
+summary(anomaly_data$Percent.DEW)
+```
+
+Here we verify that mean value is the 12.55% as we found in the initial EDA. We also see where the cut off values are for the quartiles. The first quartile or bottom 25% of the data are DEW percent values of less than 4%. The second quartile contains the DEW percents that range from 4% to 10.25%. The third quartile ranges from 10.25% to 18.2%. And the final quartile is all DEW percents of greater than 18.2%. This Histogram shows the distribution of these quartiles.
+
+## Plots
+
+## ![](images/ad1.png)
 
 ## Tables
 
-## Plots (Images)
+```{r message=FALSE}
+#| code-fold: true
+#| code-summary: "Load Libraries"
 
-![](images/g1.png)
+suppressWarnings(library(tidyverse))
+library(knitr)
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+# read in data
+anomaly_data <- read.csv("data/study_data.csv")
+# create column to label high dew percentage courses
+anomaly_data <- anomaly_data %>% 
+  mutate(DEW_Class = case_when(
+    Percent.DEW < 30 ~ 0,
+    Percent.DEW >= 30 ~ 1
+  ))
+high_risk <- anomaly_data %>% 
+  filter(DEW_Class > 0)
+
+high_total <- aggregate(DEW_Class~College + TERM_LD, data=high_risk, sum)
+high_total <- high_total %>% pivot_wider(names_from = TERM_LD, values_from = DEW_Class)
+kable(high_total, caption =  "Total High Risk Courses for Each College per Semester")
+```
 
 # Time Series Analysis
 
@@ -78,11 +113,11 @@ You can use plain text - one plot about why we narrow down the data. Why just to
 ## Code
 
 ``` r
-dew_data <- read.csv("data/DEW Rates.csv")
+study_data <- read.csv("data/study_data.csv")
 # Filter the data for the specified colleges and TERM_LD values
 selected_colleges <- c('College of Agric and Life Sci', 'College of Humanities','College of Science', 'College of Social & Behav Sci', 'Eller College of Management')
 selected_terms <- c('Fall 2018', 'Spring 2019', 'Fall 2019', 'Spring 2020', 'Fall 2020', 'Spring 2021')
-filtered_data <- dew_data %>%
+filtered_data <- study_data %>%
   filter(College %in% selected_colleges & TERM_LD %in% selected_terms)
 #DEW count (K) for 5 colleges over semesters - Utkarsha
 # Aggregate the data

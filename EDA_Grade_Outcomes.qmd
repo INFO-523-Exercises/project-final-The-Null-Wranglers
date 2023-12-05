@@ -109,11 +109,6 @@ kable(dew_per_course, caption =  "Average Number of D, F, and W Grade(percentage
 
 Despite enrollment staying steady, we see a noticeable decrease in DEW outcomes for the spring of 2020. Followed by an increase for the fall of 2020.
 
-```{r}
-# should we add a line chart here?
-  
-```
-
 ## Averages by College -R
 
 Calc the mean averages overall - high - enrollemnt, pass, d, e, w, dew
@@ -125,6 +120,8 @@ Visualiaze in bar
 # If not, install it using install.packages("ggplot2")
 library(ggplot2)
 
+dew_data1 <- read.csv("data/study_data.csv")
+
 # Define the order of variables
 variable_order <- c( "Percent.Passed", "Percent.D.Grade", "Percent.E.Grade", "Percent.W.Grade", "Percent.DEW")
 
@@ -132,12 +129,11 @@ variable_order <- c( "Percent.Passed", "Percent.D.Grade", "Percent.E.Grade", "Pe
 means_data <- data.frame(
   Variable = factor(variable_order, levels = variable_order),
   Mean_Value = c(
-    #mean(clean_dew_data$Total.Student.Count), Write a note on this
-    mean(dew_data$Percent.Passed),
-    mean(dew_data$Percent.D.Grade),
-    mean(dew_data$Percent.E.Grade),
-    mean(dew_data$Percent.W.Grade),
-    mean(dew_data$Percent.DEW)
+    mean(dew_data1$Percent.Passed),
+    mean(dew_data1$Percent.D.Grade),
+    mean(dew_data1$Percent.E.Grade),
+    mean(dew_data1$Percent.W.Grade),
+    mean(dew_data1$Percent.DEW)
   )
 )
 

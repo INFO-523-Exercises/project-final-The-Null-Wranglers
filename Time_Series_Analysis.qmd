@@ -26,20 +26,18 @@ kable(head(study_data))
 ```
 
 ```{r}
-
-dew_data <- read.csv("data/DEW Rates.csv")
-
+#| code-fold: true
+#| code-summary: "filter data"
 # Filter the data for the specified colleges and TERM_LD values
 selected_colleges <- c('College of Agric and Life Sci', 'College of Humanities','College of Science', 'College of Social & Behav Sci', 'Eller College of Management')
 
 
 selected_terms <- c('Fall 2018', 'Spring 2019', 'Fall 2019', 'Spring 2020', 'Fall 2020', 'Spring 2021')
 
-filtered_data <- dew_data %>%
+filtered_data <- study_data %>%
   filter(College %in% selected_colleges & TERM_LD %in% selected_terms)
 
 ```
-
 
 ```{r, warning=FALSE}
 #DEW count (K) for 5 colleges over semesters - Utkarsha
@@ -77,7 +75,6 @@ ggsave("images/TSA1.png", plot = plot)
 
 
 ```
-
 
 ```{r}
 #DEW counts (H, I, J) for 5 colleges (Facet) over semesters  - Dong
@@ -135,24 +132,28 @@ summary <- grouped_data %>%
     count = n()
   )
 
-# Plotting the facet line graph
+# Plotting the facet line graph with adjusted strip text labels and legend at the bottom
 plot2 <- ggplot(summary, aes(x = TERM_LD, y = count, group = Course_Level, color = Course_Level)) +
   geom_line() +
   geom_point() +
-  facet_wrap(~College, scales = "free") +
+  facet_wrap(~College) +
   labs(
     title = "",
     x = "Term",
     y = "Count"
   ) +
-  theme_minimal()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        strip.text = element_text(size = 10, angle = 0, hjust = 0.5),
+        legend.position = "bottom",  # Place legend at the bottom
+        legend.direction = "horizontal",  # Display legend horizontally
+        legend.box = "horizontal")  # Align legend items horizontally
 
 # Save the plot as a PNG file
-ggsave("images/TSA2.png", plot = plot2)
+ggsave("images/TSA2.png", plot = plot2, width = 12, height = 8, units = "in")
+
 
 ```
-
 
 ```{r}
 study_data <- read.csv("data/study_data.csv")
@@ -304,6 +305,3 @@ plot3 <- ggplot(long_data, aes(x = TeachingFormat, y = MeanEnrollment, fill = Te
 # Save the plot as a PNG file
 ggsave("images/TSA3.png", plot = plot3)
 ```
-
-
-

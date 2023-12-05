@@ -71,10 +71,11 @@ The next step we took was to create box and whisker plots. The first plot seen b
 ```{r}
 #| code-fold: true
 #| code-summary: "Box Plot of DEW Percent"
-ggplot(anomaly_data, aes(y = College, x = Percent.DEW)) +
+ad1 <- ggplot(anomaly_data, aes(y = College, x = Percent.DEW)) +
   geom_boxplot(fill = "lightblue", color = "black") +
   labs(title = "Boxplot of Percent DEW",  x = "Percent DEW", y="")
-
+ggsave("images/ad1.png", plot=ad1)
+ad1
 ```
 
 The next plot shows how DEW Percentage for each mode for courses. The outliers seem to be evenly distributed across the types of different modes for courses and not isolated to a specific mode.
@@ -99,9 +100,7 @@ ggplot(anomaly_data, aes(y = Mode, x = Percent.DEW)) +
   facet_wrap(~College, ncol=3)
 ```
 
-``` r
-Tables of High DEW Percent Courses
-```
+## Tables of High DEW Percent Courses
 
 After completing these bow plots, we decided to add a classification column that labeled any DEW percentage over 30% as High and all other percentages as Low. We determined this 30% cut off by using the box plots from above that showed outliers in all colleges and modes occurred above the 30% threshold. This creates a new data set with 528 observations. This mean that about 8% of courses from the original data are being considered for further analysis.
 
