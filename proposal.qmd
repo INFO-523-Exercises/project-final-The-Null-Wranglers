@@ -38,7 +38,7 @@ The high-level goal of this study is to analyze and understand the grade outcome
 The first data set used for this analysis, is known as the DEW Rates, contains information about the breakdown of grade value outcomes during the academic years of 2018-19, 2019-20, and 2020-21 at the University of Arizona. The consists of 35697 observations of courses with 23 variables related to enrollment and grade values. Below is a description of the data:
 
 | Variable                     | Description                                                                                                                                                          |
-|------------------|------------------------------------------------------|
+|------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | College                      | Identifies the college at the University of Arizona                                                                                                                  |
 | Department                   | Identifies which department within given college                                                                                                                     |
 | Subject.Code                 | Identifies the subject of the course with a 3 or 4 letter code                                                                                                       |
@@ -77,7 +77,7 @@ kable(head(dew_counts))
 The second data set used for this analysis, is known as the SY20 and SY21, contains information about course attributes for the academic years of 2019-20, and 2020-21 at the University of Arizona. Unfortunately the academic year of 2018-19 was unable to obtained for this study. There are over 260,000 observations of courses with 27 variable per observation.
 
 | Variable          | Description                                                       |
-|--------------------|----------------------------------------------------|
+|-------------------|-------------------------------------------------------------------|
 | Term              | The term the course was offered                                   |
 | Campus            | The campus the course was offered at                              |
 | Session           | The type of session for the course - regular, first 7 weeks, etc, |
