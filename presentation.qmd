@@ -299,7 +299,7 @@ rpart.plot(tree_default)
 
 # Regression
 
-Feature Selection using College of Social and Behavioural Sciences
+Feature Selection using College of Social and Behavioral Sciences
 
 ## Correlate - Mode of Class
 
@@ -313,19 +313,12 @@ Correlation of Percent DEW, In- Person, Full Online, Hybrid, Live-online
 
 ## Selected Features
 
--   \- DEW_COUNT
-
--   \- Total.Enroll
-
 -   \- Percent.DEW
 
 -   \- Full_Online
 
 -   \- Second_Half_Session
 
--   \- First_Half_Session
-
--   \- Reg_Session
 
 ## Multilinear Regression
 
