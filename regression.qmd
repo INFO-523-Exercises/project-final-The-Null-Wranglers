@@ -187,7 +187,7 @@ Multi
 
 ```{r}
 # Perform multiple linear regression
-model <- lm(Percent.DEW ~ Second_Half_Session, data = model_data)
+model <- lm(Percent.DEW ~ Second_Half_Session + Full_Online, data = model_data)
 # Summary of the regression model
 # Summary of the regression model in a kable table
 summary_table <- data.frame(

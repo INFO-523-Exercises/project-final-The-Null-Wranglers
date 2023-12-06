@@ -69,9 +69,9 @@ dew_data <- read.csv("data/clean_dew_data.csv")
 
 # Datasets
 
-(1) DEW Rates -- Breakdown of grade value outcomes during the academic years of 2018-19, 2019-20, and 2020-21 at UArizona.
+(1) DEW Rates -- Breakdown of grade value outcomes during the academic years of 2018-19, 2019-20, and 2020-21 at UArizona It consists of 35697 observations of courses with 23 variables related to enrollment and grade values .
 
-(2) Course Attributes -- Course attributes for the academic years of 2019-20, and 2020-21 at UArizona.
+(2) Course Attributes -- Course attributes for the academic years of 2019-20, and 2020-21 at UArizona. There are over 260,000 observations of courses with 27 variables per observation.
 
 # EDA
 
@@ -137,7 +137,7 @@ kable(enrollment, caption =  "Total Student Enrollment for Each College per Seme
   kable_styling(font_size = 18, full_width = F)
 ```
 
-*We also looked at the total D, F, and W grade counts for each college per semester.*
+*We also looked at the total D, E, and W grade counts for each college per semester.*
 
 ```{r}
 #| code-fold: true
@@ -166,7 +166,7 @@ kable(student_per_course, caption =  "Average Number of Student Enrollment per C
   kable_styling(font_size = 18, full_width = F)
 ```
 
-*We also calculated average number of D, F, W per course by college each semester.*
+*We also calculated average number of D, E, W per course by college each semester.*
 
 ```{r}
 #| code-fold: true
@@ -273,10 +273,6 @@ Here we verify that mean value is the 12.55% as we found in the initial EDA..
 
 ## Plot 3
 
-![Count of Course Levels for different colleges changed over different Terms](images/img3_TSA.png){width="100%"}
-
-## Plot 4
-
 ![Total Classes Attended in Different Time Slots for Colleges changed over different Terms](images/img4_TSA.png){width="100%"}
 
 # Decision Tree
@@ -347,7 +343,7 @@ Correlation of Percent DEW, In- Person, Full Online, Hybrid, Live-online
 ``` r
 {r}
 # Perform multiple linear regression
-model <- lm(Percent.DEW ~ Second_Half_Session, data = model_data)
+model <- lm(Percent.DEW ~ Second_Half_Session + Full_Online, data = model_data)
 # Create a linear regression model specification
 lin_reg_spec <- linear_reg() |>
   set_engine("lm")
@@ -378,3 +374,5 @@ y_pred_test <- predict(lin_reg_fit, new_data = test_data) |>
 ## Ridge - Training and Testing Error
 
 ![](images/ridge_model_errors_plot.png){width="638"}
+
+# Thankyou
