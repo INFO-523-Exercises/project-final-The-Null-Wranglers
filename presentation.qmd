@@ -63,7 +63,6 @@ dew_data <- read.csv("data/clean_dew_data.csv")
 
 -   Goal: To analyze and understand the student grade outcomes at the University of Arizona (UArizona) before, during, and after the COVID-19 pandemic.
 -   Research Questions:
-
 (1) Pattern Analysis -- What if any patterns or relationships exist between colleges, departments, or course level and grade outcomes for enrolled students?
 (2) Predictive Modeling -- Can a predictive model be developed that accurately forecasts grade outcomes based on course attributes?
 
