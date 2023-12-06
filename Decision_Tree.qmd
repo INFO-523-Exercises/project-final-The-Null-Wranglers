@@ -60,9 +60,10 @@ tree_default <- tree_data %>%
   rpart(DEW_COUNT ~ ., data = .)
 
 # Plot the decision tree using rpart.plot and save it as a PNG file
-png("images/decision_tree.png", width = 15, height = 15, units = "in", res= 400)
-rpart.plot(tree_default, box.palette = "auto", shadow.col = "gray", nn = TRUE)
+png("images/decision_tree.png", width = 1000, height = 600)
+rpart.plot(tree_default, box.palette = "auto", shadow.col = "gray", nn = TRUE, roundint = FALSE, cex = 1.5)
 dev.off()
-rpart.plot(tree_default, extra = 1, under = 1, cex = 1.5)
 
+# Plot the decision tree with an increased size
+rpart.plot(tree_default, box.palette = "auto", shadow.col = "gray", nn = TRUE, roundint = FALSE, cex = 1.5)
 ```

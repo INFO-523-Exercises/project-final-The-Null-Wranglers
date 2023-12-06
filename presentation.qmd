@@ -38,32 +38,200 @@ knitr::opts_chunk$set(
 ```
 
 ```{r}
-#| label: load-data
-#| include: false
-# Load data here
-data(mtcars)
-mtcars$speed <- mtcars$hp / mtcars$wt
-data("penguins")
+#| label: load-pkgs
+#| message: false
+suppressWarnings(library(tidyverse))
+library(lubridate)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(kableExtra)
+library(stringr)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Load data"
+# read in data
+study_data <- read.csv("data/study_data.csv")
+# read in data
+dew_data <- read.csv("data/clean_dew_data.csv")
 ```
 
 # Introduction
 
--   Research Questions
--   Datasets
+-   Goal: To analyze and understand the student grade outcomes at the University of Arizona (UArizona) before, during, and after the COVID-19 pandemic.
+-   Research Questions:
+
+(1) Pattern Analysis -- What if any patterns or relationships exist between colleges, departments, or course level and grade outcomes for enrolled students?
+(2) Predictive Modeling -- Can a predictive model be developed that accurately forecasts grade outcomes based on course attributes?
+
+# Datasets
+
+(1) DEW Rates -- Breakdown of grade value outcomes during the academic years of 2018-19, 2019-20, and 2020-21 at UArizona.
+
+(2) Course Attributes -- Course attributes for the academic years of 2019-20, and 2020-21 at UArizona.
 
 # EDA
 
-You can use plain text - one plot about why we narrow down the data. Why just top 5 colleges, any one mean enrollment table. ::: columns ::: {.column width="40%"} - or bullet points\[\^1\] ::: ::: {.column width="60%"} or in two columns ::: ::: \[\^1\]: And add footnotes - like - this
+*For both data sets, we started with checking all columns and data shape. We decided which columns we will be using.* *We also checked and handled missing values.*
 
-## Code
+## Check columns of the "DEW Rates" data set
 
-## Tables
+```{r}
+# Check columns - DEW Rates(Breakdown of grade value outcomes during the academic years of 2018-19, 2019-20, and 2020-21 at UArizona)
+kable(head(dew_data))%>%
+  kable_styling(font_size = 18, full_width = F)
+```
 
-## Plots (Images)
+## Check columns of the "Course Attributes" data set
+
+```{r}
+# Check columns - SY20 and SY21 (Course attributes for the academic years of 2019-20, and 2020-21 at UArizona)
+kable(head(study_data))%>%
+  kable_styling(font_size = 18, full_width = F)
+```
+
+## Total course offering for each college per semester
+
+```{r}
+#| code-fold: true
+#| code-summary: "summary of total courses"
+table1<- dew_data %>% group_by(College) %>% count(TERM_LD)
+table1 <- table1 %>% pivot_wider(names_from = TERM_LD, values_from = n)
+kable(table1, caption = "")%>%
+  kable_styling(font_size = 12, full_width = F)
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "remove low course offering colleges"
+dew_data <- dew_data %>% filter(College != "College of Medicine - Tucson",
+                                College != "College of Nursing",
+                                College != "College of Public Health",
+                                College != "Colleges of Letters Arts & Sci",
+                                College != "Graduate College",
+                                College != "James E Rogers College of Law",
+                                College != "R Ken Coit College of Pharmacy",
+                                College != "W.A. Franke Honors College",
+                                College != "College of Applied Sci & Tech",
+                                College != "College of Education",
+                                College != "College of Engineering",
+                                College != "College of Fine Arts")
+```
+
+*Then, we limited focus to the top 5 colleges by course enrollment.*
+
+## 
+
+*Then, we looked at the total student enrollment for each college per semester.*
+
+```{r }
+#| code-fold: true
+#| code-summary: "summary of total enrollment"
+# total enrollment table
+enrollment <- aggregate(Total.Student.Count~College + TERM_LD, data=dew_data, sum)
+enrollment <- enrollment %>% pivot_wider(names_from = TERM_LD, values_from = Total.Student.Count)
+kable(enrollment, caption =  "Total Student Enrollment for Each College per Semester")%>%
+  kable_styling(font_size = 18, full_width = F)
+```
+
+*We also looked at the total D, F, and W grade counts for each college per semester.*
+
+```{r}
+#| code-fold: true
+#| code-summary: "summary of total enrollment"
+dew_total <- aggregate(DEW_COUNT~College + TERM_LD, data=dew_data, sum)
+dew_total <- dew_total %>% pivot_wider(names_from = TERM_LD, values_from = DEW_COUNT)
+kable(dew_total, caption =  "Total D, F, W Grade Counts for Each College per Semester")%>%
+  kable_styling(font_size = 18, full_width = F)
+# Despite enrollment staying steady, we see a noticeable decrease in DEW outcomes for the spring of 2020. Followed by an increase for the fall of 2020.
+```
+
+## 
+
+*We then calculated average number of students per course by college each semester.*
+
+```{r}
+#| code-fold: true
+#| code-summary: "average number of students per course"
+student_per_course <- aggregate(Total.Student.Count ~College + TERM_LD, data=dew_data, mean)
+# round to nearest whole digit
+student_per_course$Total.Student.Count <- round(student_per_course$Total.Student.Count)
+# pivot wider
+student_per_course <- student_per_course %>% pivot_wider(names_from = TERM_LD, values_from = Total.Student.Count)
+# display table
+kable(student_per_course, caption =  "Average Number of Student Enrollment per Course by College Each Semester")%>%
+  kable_styling(font_size = 18, full_width = F)
+```
+
+*We also calculated average number of D, F, W per course by college each semester.*
+
+```{r}
+#| code-fold: true
+#| code-summary: "average number of students per course"
+dew_per_course <- aggregate(Percent.DEW ~College + TERM_LD, data=dew_data, mean)
+# round to 2 digits
+dew_per_course$Percent.DEW <- round(dew_per_course$Percent.DEW, 2)
+# pivot wider
+dew_per_course <- dew_per_course %>% pivot_wider(names_from = TERM_LD, values_from = Percent.DEW)
+# display table
+kable(dew_per_course, caption =  "Average Number of D, F, and W Grade (percentage) per Course by College Each Semester")%>%
+  kable_styling(font_size = 18, full_width = F)
+```
+
+## 
+
+*We calculated the mean averages for the pass, D, E, W, and DEW rates across the five selected colleges.*
+
+```{r}
+library(dplyr)
+library(knitr)
+library(stringr)
+# Group by College and calculate the mean for each grade-related column
+college_means_data <- dew_data %>%
+  group_by(College) %>%
+  summarise(PASS_GRADE_COUNT = mean(PASS_GRADE_COUNT),
+            D_GRADE_COUNT = mean(D_GRADE_COUNT),
+            FAIL_GRADE_COUNT = mean(FAIL_GRADE_COUNT),
+            WITHDRAW_GRADE_COUNT = mean(WITHDRAW_GRADE_COUNT),
+            DEW_COUNT = mean(DEW_COUNT))
+# Remove underscores from column names
+names(college_means_data) <- str_replace_all(names(college_means_data), "_", " ")
+# Round off mean values to two decimal points
+college_means_data[, -1] <- round(college_means_data[, -1], 2)
+# Create a kable table for means of each grade-related column for each college
+kable(college_means_data,
+               caption = "Means for Total Pass, D, E, W, and Total DEW Counts Across Colleges")%>%
+  kable_styling(font_size = 18, full_width = F)
+```
+
+## EDA of Course Attributes Data Set
+
+*Below is one example of our EDA steps, focusing on how class times throughout the day impact courses across different colleges.*
+
+```{r}
+library(dplyr)
+# Create a table for each time slot
+time_slots <- c("Early_Morning", "Mid_Morning", "Early_Afternoon", "Mid_Afternoon", "Evening", "Asynchronous")
+tables_list <- lapply(time_slots, function(slot) {
+  table_data <- study_data %>%
+    group_by(College) %>%
+    summarise(Mean_Classes_Attended = round(mean(get(slot), na.rm = TRUE), 2))
+  names(table_data)[2] <- paste("Mean_", slot)
+  table_data
+})
+# Merge tables into a single table by College name
+merged_table <- Reduce(function(x, y) merge(x, y, by = "College", all = TRUE), tables_list)
+# Display the merged table
+kable(merged_table)%>%
+  kable_styling(font_size = 18, full_width = F)
+```
 
 # Anomaly Detection
 
--   In order to identify patterns or trends in the Grade Outcomes, we wanted to better understand the current anomalies in the data. We focused on trying to identify outliers that had a high value of poor grade outcomes. We decided to base this anomaly detection on the percentage of D, E, or W grades for a course. This decision was made so that high enrollment courses, such as English 101 with enrollment over 3500, would not further skew the data. We began by examining the quartiles for the D.E.W. Percentage.
+In order to identify patterns or trends in the Grade Outcomes, we wanted to better understand the current anomalies in the data. We focused on identifying outliers with a high value of poor grade outcomes.
 
 ```{r}
 #| code-fold: true
@@ -73,135 +241,43 @@ anomaly_data <- read.csv("data/study_data.csv")
 summary(anomaly_data$Percent.DEW)
 ```
 
-Here we verify that mean value is the 12.55% as we found in the initial EDA. We also see where the cut off values are for the quartiles. The first quartile or bottom 25% of the data are DEW percent values of less than 4%. The second quartile contains the DEW percents that range from 4% to 10.25%. The third quartile ranges from 10.25% to 18.2%. And the final quartile is all DEW percents of greater than 18.2%. This Histogram shows the distribution of these quartiles.
+Here we verify that mean value is the 12.55% as we found in the initial EDA..
 
-## Plots
+## Histogram of DEW Percentages
 
-## ![](images/ad1.png)
+![](images/g1.png){width="800"}
 
-## Tables
+## Box Plot of DEW Percents
 
-```{r message=FALSE}
-#| code-fold: true
-#| code-summary: "Load Libraries"
+![](images/ad1.png){width="640"}
 
-suppressWarnings(library(tidyverse))
-library(knitr)
-library(lubridate)
-library(ggplot2)
-library(dplyr)
-# read in data
-anomaly_data <- read.csv("data/study_data.csv")
-# create column to label high dew percentage courses
-anomaly_data <- anomaly_data %>% 
-  mutate(DEW_Class = case_when(
-    Percent.DEW < 30 ~ 0,
-    Percent.DEW >= 30 ~ 1
-  ))
-high_risk <- anomaly_data %>% 
-  filter(DEW_Class > 0)
+## Table of High DEW Percent Courses
 
-high_total <- aggregate(DEW_Class~College + TERM_LD, data=high_risk, sum)
-high_total <- high_total %>% pivot_wider(names_from = TERM_LD, values_from = DEW_Class)
-kable(high_total, caption =  "Total High Risk Courses for Each College per Semester")
-```
+![](images/antable1.png)
 
-# Time Series Analysis
+## Table of High DEW Courses Social and Behavioral Sciences
+
+![](images/antable2.png)
+
+## Time Series Analysis
 
 *Time series analysis is a statistical method used to analyze and interpret sequential data points collected and ordered over time. It involves examining patterns, trends, and behaviors within the dataset to understand how the data evolves and changes across different time intervals.*
 
-## Code
-
-``` r
-study_data <- read.csv("data/study_data.csv")
-# Filter the data for the specified colleges and TERM_LD values
-selected_colleges <- c('College of Agric and Life Sci', 'College of Humanities','College of Science', 'College of Social & Behav Sci', 'Eller College of Management')
-selected_terms <- c('Fall 2018', 'Spring 2019', 'Fall 2019', 'Spring 2020', 'Fall 2020', 'Spring 2021')
-filtered_data <- study_data %>%
-  filter(College %in% selected_colleges & TERM_LD %in% selected_terms)
-#DEW count (K) for 5 colleges over semesters - Utkarsha
-# Aggregate the data
-aggregated_data <- filtered_data %>%
-  group_by(College, TERM_LD) %>%
-  summarise(DEW_COUNT = sum(DEW_COUNT))
-# Convert TERM_LD to a factor with a specific order
-filtered_data$TERM_LD <- factor(filtered_data$TERM_LD, levels = selected_terms)
-# Save the plot to a folder named "images"
-plot <- ggplot(aggregated_data, aes(x = factor(TERM_LD, levels = selected_terms), y = DEW_COUNT, color = College, group = College)) +
-  geom_line() +
-  geom_point() +
-  labs(
-    title = "Total DEW Count Over Time",
-    x = "Term",
-    y = "Total DEW Count"
-  ) +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# Save the plot as a PNG file
-ggsave("images/TSA1.png", plot = plot)
-#DEW counts (F) based on the division level over semesters
-# Rename the 'course.level' column to 'Course_Level'
-filtered_data <- filtered_data %>%
-  rename(Course_Level =     Course.Level)
-grouped_data <- filtered_data %>%
-  group_by(College, TERM_LD, Course_Level)
-# Convert TERM_LD to factor with ordered levels
-grouped_data$TERM_LD <- factor(
-  grouped_data$TERM_LD,
-  levels = selected_terms,
-  ordered = TRUE
-)
-# Summarize the grouped data to get the desired summary statistics
-summary <- grouped_data %>%
-  summarise(
-    count = n()
-  )
-# Plotting the facet line graph
-plot2 <- ggplot(summary, aes(x = TERM_LD, y = count, group = Course_Level, color = Course_Level)) +
-  geom_line() +
-  geom_point() +
-  facet_wrap(~College, scales = "free") +
-  labs(
-    title = "Count of Course Levels over Terms",
-    x = "Term",
-    y = "Count"
-  ) +
-  theme_minimal()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-# Save the plot as a PNG file
-ggsave("images/TSA2.png", plot = plot2)
-study_data<- study_data%>%
-  filter(College == "College of Agric and Life Sci" | College ==  "Eller College of Management"|  College == "College of Social & Behav Sci"| College == "College of Science"|  College ==  "College of Humanities")
-# Reshape data and calculate mean enrollment
-long_data <- study_data%>%
-  pivot_longer(
-    cols = Laboratory:Practicum,
-    names_to = "TeachingFormat",
-    values_to = "Enrollment"
-  ) %>%
-  group_by(College, TeachingFormat) %>%
-  summarise(MeanEnrollment = mean(Enrollment, na.rm = TRUE))
-# Create a plot with facets for each college, adding colors for each TeachingFormat
-plot3 <- ggplot(long_data, aes(x = TeachingFormat, y = MeanEnrollment, fill = TeachingFormat)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~ College) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_brewer(palette = "Set1")
-# Save the plot as a PNG file
-ggsave("images/TSA3.png", plot = plot3)
-```
-
 ## Plot 1
 
-![Total DEW Count Over Time](images/TSA1.png){width="100%"}
+![Total DEW Count for different colleges changed over different Terms](images/TSA1.png){width="100%"}
 
 ## Plot 2
 
-![Count of Course Levels over Terms](images/TSA2.png){width="100%"}
+![Total D, E (fail) and W (withdraw) count for different colleges changed over different Terms](images/TSA2.png){width="100%"}
 
 ## Plot 3
 
-![Mean student enrollment in different types of teaching format by colleges](images/TSA3.png){width="100%"}
+![Count of Course Levels for different colleges changed over different Terms](images/TSA3.png){width="100%"}
+
+## Plot 4
+
+![Total Classes Attended in Different Time Slots for Colleges changed over different Terms](images/TSA4.png){width="100%"}
 
 # Decision Tree
 
@@ -222,37 +298,83 @@ rpart( DEW_COUNT~., data = _)
 rpart.plot(tree_default)
 ```
 
-## Plots (Images)
+## Plot
 
-![1. The decision tree predicts "High" if Full_Online is \>= 0.5; otherwise, it predicts "Low." 2. Tree building stops when additional splits don't significantly improve performance or when there are insufficient observations for further splitting.](images/decision_tree.png){fig-align="center" width="500"}
+![The decision tree predicts "High" if Full_Online is \>= 0.5; otherwise, it predicts "Low." Tree building stops when additional splits don't significantly improve performance or when there are insufficient observations for further splitting.](images/decision_tree.png){fig-align="center" width="500"}
 
 # Regression
 
-## Code
+College of Social and Behavioural Sciences
 
-## Tables
+## Feature selection
 
-## Plots (Images)
+Correlation of DEW Count, Total Enroll, Rm cap
 
-# Tables
+![](images/general_regression_data_table.png){width="647"}
 
-If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
+## Correlate - Day of Classes
 
-```{r}
-penguins |>
-  head() |>
-  kableExtra::kable() |>
-  kableExtra::kable_styling()
+![](images/day_regression_data_table.png){width="631"}
+
+## Correlate - Mode of Class
+
+Correlation of Percent DEW, In- Person, Full Online, Hybrid, Live-online
+
+![](images/mode_regression_data_table.png){width="650"}
+
+## Correlate - Sessions
+
+![](images/session_regression_data_table.png){width="653"}
+
+## Selected Features
+
+-   \- DEW_COUNT
+
+-   \- Total.Enroll
+
+-   \- Percent.DEW
+
+-   \- Full_Online
+
+-   \- Second_Half_Session
+
+-   \- First_Half_Session
+
+-   \- Reg_Session
+
+## Multilinear Regression
+
+``` r
+{r}
+# Perform multiple linear regression
+model <- lm(Percent.DEW ~ Second_Half_Session, data = model_data)
+# Create a linear regression model specification
+lin_reg_spec <- linear_reg() |>
+  set_engine("lm")
+# Fit the model to the training data
+lin_reg_fit <- lin_reg_spec |>
+  fit(y ~ X, data = train_data)
+# Apply model to the test set
+y_pred_test <- predict(lin_reg_fit, new_data = test_data) |>
+  pull(.pred)
 ```
 
-# Images
+## Predicted Function
 
-![Image credit: Danielle Navarro, Percolate.](images/watercolour_sys02_img34_teacup-ocean.png){fig-align="center" width="500"} \# Math Expressions {.smaller} You can write LaTeX math expressions inside a pair of dollar signs, e.g. \$\\alpha+\\beta\$ renders $\alpha + \beta$. You can use the display style with double dollar signs:
+![](images/Predicted_Function.png){width="649"}
 
-```         
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
-```
+## Lasso Regression
 
-$$
-\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i
-$$ Limitations: 1. The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character; 2. There should not be spaces after the opening `$` or before the closing `$`. \# Wrap up \## Feeling adventurous? - You are welcomed to use the default styling of the slides. In fact, that's what I expect majority of you will do. You will differentiate yourself with the content of your presentation. - But some of you might want to play around with slide styling. Some solutions for this can be found at https://quarto.org/docs/presentations/revealjs.
+![](images/lasso_model_plot.png){width="642"}
+
+## Lasso - Training and Testing Error
+
+![](images/lasso_model_errors_plot.png){width="639"}
+
+## Ridge Regression
+
+![](images/ridge_model_plot.png){width="640"}
+
+## Ridge - Training and Testing Error
+
+![](images/ridge_model_errors_plot.png){width="638"}

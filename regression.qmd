@@ -26,7 +26,10 @@ pacman::p_load(colorblindr,
        glmnet,
        gridExtra,
        caret,
-       knitr)
+       knitr, 
+       corrr, 
+       formattable, 
+       ggcorrplot)
 ```
 
 narrow down to College of Soc & Behav Sciences
@@ -72,36 +75,107 @@ Correlation Analysis
 
 ```{r}
 # Create a table and format it
- correlate(general_regression_data) %>%
+general_regression_data_table <- correlate(general_regression_data) %>% formattable()
+
+# Plot correlations using ggcorrplot
+png_file <- "images/general_regression_data_table.png"
+png(png_file, width = 10, height = 8, units = "in", res = 150)
+
+# Increase x-axis and y-axis text size
+ggcorrplot(cor(general_regression_data), lab = TRUE, lab_size = 5) +
+  theme(axis.text.x = element_text(size = 25),  # Adjust size as needed
+        axis.text.y = element_text(size = 25))  # Adjust size as needed
+
+dev.off()
+
+# Display the plot
+plot_correlate(general_regression_data_table)
+```
+
+```{r}
+# Correlation matrix of numerical variables
+day_regression_data_table <- correlate(day_regression_data) %>%
   formattable()
+
+# Plot correlations using ggcorrplot
+png_file <- "images/day_regression_data_table.png"
+png(png_file, width = 10, height = 8, units = "in", res = 200)
+
+# Increase x-axis and y-axis text size
+ggcorrplot(cor(day_regression_data), lab = TRUE, lab_size = 5) +
+  theme(axis.text.x = element_text(size = 20),  # Adjust size as needed
+        axis.text.y = element_text(size = 20))  # Adjust size as needed
+
+dev.off()
+
+# Display the plot
+plot_correlate(day_regression_data_table)
+
+```
+
+```{r}
+# Create a table and format it
+time_regression_data_table <- correlate(time_regression_data) %>%
+  formattable()
+
+# Plot correlations using ggcorrplot
+png_file <- "images/time_regression_data_table.png"
+png(png_file, width = 10, height = 8, units = "in", res = 200)
+
+# Increase x-axis and y-axis text size
+ggcorrplot(cor(time_regression_data), lab = TRUE, lab_size = 5) +
+  theme(axis.text.x = element_text(size = 20),  # Adjust size as needed
+        axis.text.y = element_text(size = 20))  # Adjust size as needed
+
+dev.off()
+
+# Display the plot
+plot_correlate(time_regression_data_table)
+
+```
+
+```{r}
+# Create a table and format it
+mode_regression_data_table <- correlate(mode_regression_data) %>%
+  formattable()
+
+# Plot correlations using ggcorrplot
+png_file <- "images/mode_regression_data_table.png"
+png(png_file, width = 10, height = 8, units = "in", res = 200)
+
+# Increase x-axis and y-axis text size
+ggcorrplot(cor(mode_regression_data), lab = TRUE, lab_size = 5) +
+  theme(axis.text.x = element_text(size = 30),  # Adjust size as needed
+        axis.text.y = element_text(size = 30))  # Adjust size as needed
+
+dev.off()
+
+# Display the plot
+plot_correlate(mode_regression_data_table)
+
 
 ```
 
 ```{r}
 # Correlation matrix of numerical variables
-plot_coorelate <- day_regression_data |>
-plot_correlate()
-# Save the plot as a PNG file
-ggsave("images/correlation.png", plot = plot_coorelate)
+session_regression_data_table <- correlate(session_regression_data) %>%
+  formattable()
 
-```
+# Save the plot as a PNG file with increased x-axis and y-axis text size
+png_file <- "images/session_regression_data_table.png"
+png(png_file, width = 10, height = 8, units = "in", res = 200)
 
-```{r}
-time_regression_data_table <-time_regression_data %>% plot_correlate()
-# Save the plot as a PNG file
-ggsave("images/time_regression_data_table.png", plot = time_regression_data_table)
+# Increase x-axis and y-axis text size in the saved plot
+ggcorrplot(cor(session_regression_data), lab = TRUE, lab_size = 5) +
+  theme(axis.text.x = element_text(size = 20),  # Adjust size as needed
+        axis.text.y = element_text(size = 20))  # Adjust size as needed
 
-```
+dev.off()
 
-```{r}
-mode_regression_data_table <-mode_regression_data %>% plot_correlate()
-# Save the plot as a PNG file
-ggsave("images/mode_regression_data_table.png", plot = mode_regression_data_table)
-```
+# Display the saved plot
+plot_correlate(session_regression_data_table)
 
-```{r}
-session_regression_data_table<- session_regression_data %>% plot_correlate()
-ggsave("images/msession_regression_data-table.png", plot = session_regression_data_table)
+
 ```
 
 ```{r}
@@ -129,8 +203,8 @@ kable(summary_table, align = "c")
 
 ```{r}
 set.seed(1)
-# both
-# X will be full_online
+
+# X will be Second_Half_Session
 X <- model_data$Second_Half_Session
 # y will be the percent dew
 y <- model_data$Percent.DEW
@@ -175,6 +249,8 @@ True_Predicted_table <-ggplot() +
   ylab('Predicted values for y')
 
 ggsave("images/True_Predicted_table.png", plot=True_Predicted_table)
+
+plot(True_Predicted_table)
 ```
 
 ```{r}
@@ -210,23 +286,31 @@ cat("Intercept =", intercept, "\n")
 
 ```{r}
 ### Step 4: Postprocessing
-
 # Plot outputs
-Predicted_Function <-ggplot() +
+Predicted_Function <- ggplot() +
   geom_point(aes(x = as.vector(X_test), y = as.vector(y_test)), color = 'black') +
   geom_line(aes(x = as.vector(X_test), y = y_pred_test), color = 'blue', linewidth = 1) +
   ggtitle(sprintf('Predicted Function: y = %.2fX + %.2f', slope, intercept)) +
   xlab('X') +
-  ylab('y')
+  ylab('y') +
+  theme(axis.text.x = element_text(size = 20),  # Adjust size as needed
+        axis.text.y = element_text(size = 20), 
+        plot.title = element_text(size = 25))  # Adjust size as needed
 
-ggsave("images/Predicted_Function.png", plot=Predicted_Function)
+# Save the plot as a PNG file
+ggsave("images/Predicted_Function.png", plot = Predicted_Function)
+
+# Display the plot
+plot(Predicted_Function)
+
+
 
 ```
 
 Lasso
 
 ```{r}
-# Rohit
+
 # Extract the predictor variables and response variable
 X <- model_data[, c("Full_Online", "Second_Half_Session")]
 y <- model_data$Percent.DEW
@@ -291,20 +375,28 @@ High mse indicates poor results in prediction
 # Extract the predictor variables and response variable
 X <- model_data[, c("Full_Online", "Second_Half_Session")]
 y <- model_data$Percent.DEW
+
 # Standardize the predictor variables (optional but recommended for regularization)
 X <- scale(X)
+
 # Set up a sequence of lambda values
 lambda_values <- 10^seq(10, -2, length = 100)
+
 # Train Lasso regression model with cross-validation
 lasso_model <- cv.glmnet(X, y, alpha = 1, lambda = lambda_values)
-# Plot training and testing errors
-plot(lasso_model$glmnet.fit, xvar = "lambda", label = TRUE, lwd = 2, col = c("blue", "red"), main = "Lasso Regression - Training and Testing Errors")
-legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lty = 1)
 
 # Save the plot as a PNG file in the "images" folder
 png("images/lasso_model_errors_plot.png", width = 800, height = 600)
-dev.off()
+# Plot training and testing errors
+plot(lasso_model$glmnet.fit, xvar = "lambda", label = TRUE, lwd = 2, col = c("blue", "red"), main = "Lasso Regression - Training and Testing Errors")
 legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lty = 1)
+dev.off()
+
+# Plot training and testing errors again
+plot(lasso_model$glmnet.fit, xvar = "lambda", label = TRUE, lwd = 2, col = c("blue", "red"), main = "Lasso Regression - Training and Testing Errors")
+legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lty = 1)
+
+
 ```
 
 Ridge
@@ -313,26 +405,43 @@ Ridge
 # Extract the predictor variables and response variable
 X <- model_data[, c("Full_Online", "Second_Half_Session")]
 y <- model_data$Percent.DEW
+
 # Standardize the predictor variables (optional but recommended for regularization)
 X <- scale(X)
+
 # Set up the Ridge regression model
 ridge_model <- cv.glmnet(X, y, alpha = 0)  # alpha = 0 for Ridge
+
 # Plot the cross-validated mean squared error (optional)
 plot(ridge_model)
-
 
 # Save the plot as a PNG file in the "images" folder
 png("images/ridge_model_plot.png", width = 800, height = 600)
 plot(ridge_model)
-dev.off()
 
 # Identify the optimal lambda (penalty parameter)
 best_lambda <- ridge_model$lambda.min
 cat("Best Lambda:", best_lambda, "\n")
+
+# Add a dotted line for the best lambda
+abline(v = log(best_lambda), col = "red", lty = 2)
+
+dev.off()
+# Identify the optimal lambda (penalty parameter)
+best_lambda <- ridge_model$lambda.min
+cat("Best Lambda:", best_lambda, "\n")
+
+# Add a dotted line for the best lambda
+abline(v = log(best_lambda), col = "red", lty = 2)
+
 # Refit the model with the optimal lambda
-final_ridge_model <- glmnet(X, y, alpha = 0, lambda = best_lambda)
+final_model <- glmnet(X, y, alpha = 0, lambda = best_lambda)
+
 # Display coefficients
-coef(final_ridge_model)
+coef(final_model)
+
+
+
 ```
 
 ```{r}
@@ -368,18 +477,25 @@ print(paste("Mean Squared Error on Test Data:", mse))
 # Extract the predictor variables and response variable
 X <- model_data[, c("Full_Online", "Second_Half_Session")]
 y <- model_data$Percent.DEW
+
 # Standardize the predictor variables (optional but recommended for regularization)
 X <- scale(X)
+
 # Set up a sequence of lambda values
 lambda_values <- 10^seq(10, -2, length = 100)
+
 # Train Ridge regression model with cross-validation
 ridge_model <- cv.glmnet(X, y, alpha = 0, lambda = lambda_values)
-# Plot training and testing errors
-plot(ridge_model$glmnet.fit, xvar = "lambda", label = TRUE, lwd = 2, col = c("blue", "red"), main = "Ridge Regression - Training and Testing Errors")
-legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lty = 1)
 
 # Save the plot as a PNG file in the "images" folder
 png("images/ridge_model_errors_plot.png", width = 800, height = 600)
-dev.off()
+# Plot training and testing errors
+plot(ridge_model$glmnet.fit, xvar = "lambda", label = TRUE, lwd = 2, col = c("blue", "red"), main = "Ridge Regression - Training and Testing Errors")
 legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lty = 1)
+dev.off()
+
+# Plot training and testing errors again
+plot(ridge_model$glmnet.fit, xvar = "lambda", label = TRUE, lwd = 2, col = c("blue", "red"), main = "Ridge Regression - Training and Testing Errors")
+legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lty = 1)
+
 ```

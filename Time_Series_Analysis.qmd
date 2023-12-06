@@ -63,17 +63,18 @@ plot <- ggplot(aggregated_data, aes(x = factor(TERM_LD, levels = selected_terms)
   geom_line() +
   geom_point() +
   labs(
-    title = "Total DEW Count Over Time",
+    title = "",
     x = "Term",
     y = "Total DEW Count"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size=15), axis.text.y = element_text(size=15))
+  
 
 # Save the plot as a PNG file
 ggsave("images/TSA1.png", plot = plot)
 
-
+plot
 ```
 
 ```{r}
@@ -90,7 +91,7 @@ aggregated_data <- filtered_data %>%
 aggregated_data$TERM_LD <- factor(aggregated_data$TERM_LD, levels = selected_terms)
 
 # Create a facet plot with lines for time series analysis
-ggplot(aggregated_data, aes(x = TERM_LD, group = College)) +
+plot2<-ggplot(aggregated_data, aes(x = TERM_LD, group = College)) +
   geom_line(aes(y = D_GRADE_COUNT, color = "D_GRADE_COUNT"), size = 1) +
   geom_line(aes(y = FAIL_GRADE_COUNT, color = "FAIL_GRADE_COUNT"), size = 1) +
   geom_line(aes(y = WITHDRAW_GRADE_COUNT, color = "WITHDRAW_GRADE_COUNT"), size = 1) +
@@ -102,9 +103,15 @@ ggplot(aggregated_data, aes(x = TERM_LD, group = College)) +
        y = "Total Count",
        color = "Category") +
   scale_color_manual(values = c("D_GRADE_COUNT" = "blue", "FAIL_GRADE_COUNT" = "red", "WITHDRAW_GRADE_COUNT" = "green")) +
-  facet_wrap(~College, scales = "free_y") +
+  facet_wrap(~College) +
   theme_minimal()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size=15), axis.text.y = element_text(size=15),
+        strip.text = element_text(size = 15, angle = 0, hjust = 0.5),
+        legend.position = "bottom",  # Place legend at the bottom
+        legend.direction = "horizontal",  # Display legend horizontally
+        legend.box = "horizontal")  # Align legend items horizontally
+# Save the plot as a PNG file
+ggsave("images/TSA2.png", plot = plot2, width = 12, height = 8, units = "in")
 
 ```
 
@@ -133,7 +140,7 @@ summary <- grouped_data %>%
   )
 
 # Plotting the facet line graph with adjusted strip text labels and legend at the bottom
-plot2 <- ggplot(summary, aes(x = TERM_LD, y = count, group = Course_Level, color = Course_Level)) +
+plot3 <- ggplot(summary, aes(x = TERM_LD, y = count, group = Course_Level, color = Course_Level)) +
   geom_line() +
   geom_point() +
   facet_wrap(~College) +
@@ -143,14 +150,14 @@ plot2 <- ggplot(summary, aes(x = TERM_LD, y = count, group = Course_Level, color
     y = "Count"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        strip.text = element_text(size = 10, angle = 0, hjust = 0.5),
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,  size=15), axis.text.y = element_text(size=15),
+        strip.text = element_text(size = 15, angle = 0, hjust = 0.5),
         legend.position = "bottom",  # Place legend at the bottom
         legend.direction = "horizontal",  # Display legend horizontally
         legend.box = "horizontal")  # Align legend items horizontally
 
 # Save the plot as a PNG file
-ggsave("images/TSA2.png", plot = plot2, width = 12, height = 8, units = "in")
+ggsave("images/TSA3.png", plot = plot3, width = 12, height = 8, units = "in")
 
 
 ```
@@ -180,7 +187,7 @@ tables_list <- lapply(time_slots, function(slot) {
 
 # Modify column names of the tables within tables_list
 for (i in 1:length(tables_list)) {
-  col_name <- paste("Total_", time_slots[i], sep = "")  # Generate new column name
+  col_name <- paste("Total ", time_slots[i], sep = "")  # Generate new column name
   names(tables_list[[i]])[3] <- col_name  # Assign new column name to the last column
 }
 
@@ -199,16 +206,24 @@ merged_table_long$TERM_LD <- factor(
 )
 
 # Plotting the facet plot with chronological x-axis
-ggplot(merged_table_long, aes(x = TERM_LD, y = Total_Classes_Attended, color = Time_Slot, group = Time_Slot)) +
+plot4<-ggplot(merged_table_long, aes(x = TERM_LD, y = Total_Classes_Attended, color = Time_Slot, group = Time_Slot)) +
   geom_line() +
-  facet_wrap(~ College, scales = "free") +
+  facet_wrap(~ College) +
   labs(
-    title = "Total Classes Attended in Different Time Slots for Colleges",
+    title = "",
     x = "Term ID",
     y = "Total Classes Attended"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,  size=15), axis.text.y = element_text(size=15),
+        strip.text = element_text(size = 15, angle = 0, hjust = 0.5),
+        legend.position = "bottom",  # Place legend at the bottom
+        legend.direction = "horizontal",  # Display legend horizontally
+        legend.box = "horizontal") # Align legend items horizontally
+       
+
+# Save the plot as a PNG file
+ggsave("images/TSA4.png", plot = plot4, width = 10, height = 8, units = "in")
 
 ```
 
@@ -296,12 +311,10 @@ long_data <- study_data%>%
   summarise(MeanEnrollment = mean(Enrollment, na.rm = TRUE))
 
 # Create a plot with facets for each college, adding colors for each TeachingFormat
-plot3 <- ggplot(long_data, aes(x = TeachingFormat, y = MeanEnrollment, fill = TeachingFormat)) +
+ggplot(long_data, aes(x = TeachingFormat, y = MeanEnrollment, fill = TeachingFormat)) +
   geom_bar(stat = "identity") +
   facet_wrap(~ College) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size=4)) +
   scale_fill_brewer(palette = "Set1")  
 
-# Save the plot as a PNG file
-ggsave("images/TSA3.png", plot = plot3)
 ```
