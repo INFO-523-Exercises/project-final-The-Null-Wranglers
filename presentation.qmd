@@ -265,19 +265,19 @@ Here we verify that mean value is the 12.55% as we found in the initial EDA..
 
 ## Plot 1
 
-![Total DEW Count for different colleges changed over different Terms](images/TSA1.png){width="100%"}
+![Total DEW Count for different colleges changed over different Terms](images/img1_TSA.png){width="100%"}
 
 ## Plot 2
 
-![Total D, E (fail) and W (withdraw) count for different colleges changed over different Terms](images/TSA2.png){width="100%"}
+![Total D, E (fail) and W (withdraw) count for different colleges changed over different Terms](images/ing2_TSA.png){width="100%"}
 
 ## Plot 3
 
-![Count of Course Levels for different colleges changed over different Terms](images/TSA3.png){width="100%"}
+![Count of Course Levels for different colleges changed over different Terms](images/img3_TSA.png){width="100%"}
 
 ## Plot 4
 
-![Total Classes Attended in Different Time Slots for Colleges changed over different Terms](images/TSA4.png){width="100%"}
+![Total Classes Attended in Different Time Slots for Colleges changed over different Terms](images/img4_TSA.png){width="100%"}
 
 # Decision Tree
 
