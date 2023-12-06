@@ -152,37 +152,6 @@ kable(dew_total, caption =  "Total D, F, W Grade Counts for Each College per Sem
 # Despite enrollment staying steady, we see a noticeable decrease in DEW outcomes for the spring of 2020. Followed by an increase for the fall of 2020.
 ```
 
-## 
-
-*We then calculated average number of students per course by college each semester.*
-
-```{r}
-#| code-fold: true
-#| code-summary: "average number of students per course"
-student_per_course <- aggregate(Total.Student.Count ~College + TERM_LD, data=dew_data, mean)
-# round to nearest whole digit
-student_per_course$Total.Student.Count <- round(student_per_course$Total.Student.Count)
-# pivot wider
-student_per_course <- student_per_course %>% pivot_wider(names_from = TERM_LD, values_from = Total.Student.Count)
-# display table
-kable(student_per_course, caption =  "Average Number of Student Enrollment per Course by College Each Semester")%>%
-  kable_styling(font_size = 18, full_width = F)
-```
-
-*We also calculated average number of D, E, W per course by college each semester.*
-
-```{r}
-#| code-fold: true
-#| code-summary: "average number of students per course"
-dew_per_course <- aggregate(Percent.DEW ~College + TERM_LD, data=dew_data, mean)
-# round to 2 digits
-dew_per_course$Percent.DEW <- round(dew_per_course$Percent.DEW, 2)
-# pivot wider
-dew_per_course <- dew_per_course %>% pivot_wider(names_from = TERM_LD, values_from = Percent.DEW)
-# display table
-kable(dew_per_course, caption =  "Average Number of D, F, and W Grade (percentage) per Course by College Each Semester")%>%
-  kable_styling(font_size = 18, full_width = F)
-```
 
 ## 
 
@@ -210,27 +179,6 @@ kable(college_means_data,
   kable_styling(font_size = 18, full_width = F)
 ```
 
-## EDA of Course Attributes Data Set
-
-*Below is one example of our EDA steps, focusing on how class times throughout the day impact courses across different colleges.*
-
-```{r}
-library(dplyr)
-# Create a table for each time slot
-time_slots <- c("Early_Morning", "Mid_Morning", "Early_Afternoon", "Mid_Afternoon", "Evening", "Asynchronous")
-tables_list <- lapply(time_slots, function(slot) {
-  table_data <- study_data %>%
-    group_by(College) %>%
-    summarise(Mean_Classes_Attended = round(mean(get(slot), na.rm = TRUE), 2))
-  names(table_data)[2] <- paste("Mean_", slot)
-  table_data
-})
-# Merge tables into a single table by College name
-merged_table <- Reduce(function(x, y) merge(x, y, by = "College", all = TRUE), tables_list)
-# Display the merged table
-kable(merged_table)%>%
-  kable_styling(font_size = 18, full_width = F)
-```
 
 # Anomaly Detection
 
@@ -353,12 +301,5 @@ y_pred_test <- predict(lin_reg_fit, new_data = test_data) |>
 
 ![](images/lasso_model_errors_plot.png){width="639"}
 
-## Ridge Regression
-
-![](images/ridge_model_plot.png){width="640"}
-
-## Ridge - Training and Testing Error
-
-![](images/ridge_model_errors_plot.png){width="638"}
 
 # Thank You
