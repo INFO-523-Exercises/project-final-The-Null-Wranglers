@@ -300,17 +300,7 @@ rpart.plot(tree_default)
 
 # Regression
 
-College of Social and Behavioural Sciences
-
-## Feature selection
-
-Correlation of DEW Count, Total Enroll, Rm cap
-
-![](images/general_regression_data_table.png){width="647"}
-
-## Correlate - Day of Classes
-
-![](images/day_regression_data_table.png){width="631"}
+Feature Selection using College of Social and Behavioural Sciences
 
 ## Correlate - Mode of Class
 
