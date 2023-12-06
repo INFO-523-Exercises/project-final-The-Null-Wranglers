@@ -361,4 +361,4 @@ y_pred_test <- predict(lin_reg_fit, new_data = test_data) |>
 
 ![](images/ridge_model_errors_plot.png){width="638"}
 
-# Thankyou
+# Thank You
