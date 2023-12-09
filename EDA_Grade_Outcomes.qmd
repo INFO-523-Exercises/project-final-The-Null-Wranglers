@@ -1,6 +1,8 @@
 ---
 title: "Exploratory Data Analysis of Grade Outcomes Data"
-author: "The Null wranglers"
+subtitle: "Proposal Final Project"
+author: "The Null Wranglers Team"
+format: html
 editor: visual
 ---
 
@@ -14,6 +16,12 @@ library(lubridate)
 library(ggplot2)
 ```
 
+This section covers an Exploratory Data Analysis of the data. All data for this project has been provided by the University of Arizona. This type of analysis is vital in order to gain a full understanding of the data that will guide future analysis techniques. The project will utilize two separate data sets.
+
+# Grade Value Data
+
+The first one contains information about the breakdown of what grade values students received in a a course. A description for the columns of the data can be found in the proposal.
+
 ```{r}
 #| code-fold: true
 #| code-summary: "Read in Data"
@@ -23,9 +31,11 @@ kable(head(dew_data))
 
 ```
 
-Add brief description of data
+This data set contains 13283 observations with a total of 24 variables.
 
-## Total number of courses per semester - K
+## Courses Per Semester and Enrollment
+
+The data set spans over 6 different semester that start from the Fall of 2018 and go until the Spring of 2021. During a cleaning process the winter and summer semester were removed. The table below shows the breakdown of course offerings by college.
 
 ```{r}
 #| code-fold: true
@@ -37,7 +47,7 @@ table1 <- table1 %>% pivot_wider(names_from = TERM_LD, values_from = n)
 kable(table1, caption = "Total Course Offering for Each College per Semester")
 ```
 
-After examining this data, we are limiting the colleges to x,y, z because a, b,c .
+After examining this data, the decision was made to remove colleges that offered less than 50 courses per semester.
 
 ```{r}
 #| code-fold: true
@@ -53,6 +63,8 @@ dew_data <- dew_data %>% filter(College != "College of Medicine - Tucson",
 
 ```
 
+After removing these columns, an examination of the total enrollment in these courses was done.
+
 ```{r }
 #| code-fold: true
 #| code-summary: "summary of total enrollment"
@@ -62,15 +74,17 @@ enrollment <- enrollment %>% pivot_wider(names_from = TERM_LD, values_from = Tot
 kable(enrollment, caption =  "Total Student Enrollment for Each College per Semester")
 ```
 
+It was then important to explore the grade value outcomes. In this project, the grade value outcome will be used to determine success and failure for a class. A successful grade outcome will be a letter grade of C or higher. A failure grade will be a letter grade of D, E, or W. An E grade is the representation of an fail grade at the University of Arizona as this institution uses F grade values in Pass/Fail courses only and a W grade represents a withdraw from the course by the student. The data does not contain information for students who drop the course within the allowed drop/add period at the beginning of the semester. The table below shows the D.E.W. grade counts in each college per semester.
+
 ```{r}
 #| code-fold: true
 #| code-summary: "summary of total enrollment"
 dew_total <- aggregate(DEW_COUNT~College + TERM_LD, data=dew_data, sum)
 dew_total <- dew_total %>% pivot_wider(names_from = TERM_LD, values_from = DEW_COUNT)
-kable(dew_total, caption =  "Total D, F, W Grade Counts for Each College per Semester")
+kable(dew_total, caption =  "Total D.E.W. Grade Counts for Each College per Semester")
 ```
 
-Go down to just top 5 colleges
+After these summaries were, a decision was made to further reduce the data to just the Top 5 Colleges for both enrollment and D.E.W. counts.
 
 ```{r}
 #| code-fold: true
@@ -81,7 +95,9 @@ dew_data <- dew_data %>% filter(College != "College of Applied Sci & Tech",
                                 College != "College of Fine Arts")
 ```
 
-## Overall Averages - R
+## Overall Averages 
+
+Once the data was reduced, the remaining data contained 8707 observations with 24 variables. Averages for course enrollment and well as D.E.W. averages were calculated and are displayed below.
 
 ```{r}
 #| code-fold: true
@@ -109,11 +125,9 @@ kable(dew_per_course, caption =  "Average Number of D, F, and W Grade(percentage
 
 Despite enrollment staying steady, we see a noticeable decrease in DEW outcomes for the spring of 2020. Followed by an increase for the fall of 2020.
 
-## Averages by College -R
+## Averages by Percentage
 
-Calc the mean averages overall - high - enrollemnt, pass, d, e, w, dew
-
-Visualiaze in bar
+As certain courses had total enrollment over 1000, the issue that the D.E.W. count from these courses could skew the data was considered. The decision to base further analysis on the D.E.W. percentage was made.
 
 ```{r}
 # Assuming you have the ggplot2 library installed
@@ -177,8 +191,131 @@ kable(college_means_data,
 
 ```
 
-```{r}
+# Course Data
 
+The second data set contain information about the attributes of the course. The first data set was merged with this using the subject code, course code and term offered. A full cleaning script can be found in the extra folder in the GitHub repository. The merged data contains 6568 observations and 70 variables.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Load data"
+# read in data
+study_data <- read.csv("data/study_data.csv")
+kable(head(study_data))
 ```
 
-## 
+## Time and Day Totals
+
+An exploration of the time of day courses were offered was done by each college. It is important to note that courses with more than one section may be offered at different times and are included this way in this data.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Total Courses for Time of day"
+
+# Create a table for each time slot
+time_slots <- c("Early_Morning", "Mid_Morning", "Early_Afternoon", "Mid_Afternoon", "Evening", "Asynchronous")
+
+tables_list <- lapply(time_slots, function(slot) {
+  table_data <- study_data %>%
+    group_by(College) %>%
+    summarise(Mean_Classes_Attended = round(sum(get(slot), na.rm = TRUE), 2))
+  
+  names(table_data)[2] <- paste("", slot)
+  table_data
+})
+
+# Merge tables into a single table by College name
+merged_table <- Reduce(function(x, y) merge(x, y, by = "College", all = TRUE), tables_list)
+
+# Display the merged table
+kable(merged_table)
+```
+
+We then considered the total number of classes offered on each day of the week and asynchronously.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Total courses for Day of Week"
+
+# Create a table for each day of the week
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", "Asynchronous")
+
+tables_list <- lapply(weekdays, function(day) {
+  table_data <- study_data %>%
+    group_by(College) %>%
+    summarise(Mean_Classes_Attended = round(sum(get(day), na.rm = TRUE), 2))
+  
+  names(table_data)[2] <- paste("Mean", day)
+  table_data
+})
+
+# Merge tables into a single table by College name
+merged_table <- Reduce(function(x, y) merge(x, y, by = "College", all = TRUE), tables_list)
+
+# Display the merged table
+kable(merged_table)
+```
+
+We removed Saturday and Sunday from future analysis.
+
+## Modality
+
+We explored the totals for each mode of delivery for each college and semester.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Total Courses for Mode"
+# Mean Number of students enrolled in in-person vs online vs … (BC to BH) for different colleges - Utkarsha
+
+# Create a table for each course type
+course_types <- c("In_Person", "Full_Online", "IntractTV", "Hybrid", "Live_Online")
+
+tables_list <- lapply(course_types, function(course) {
+  table_data <- study_data %>%
+    group_by(College) %>%
+    summarise(Mean_Enrollment = round(sum(get(course), na.rm = TRUE), 2))
+  
+  names(table_data)[2] <- paste("Enrollment_", course)
+  table_data
+})
+
+# Merge tables into a single table by College name
+merged_table <- Reduce(function(x, y) merge(x, y, by = "College", all = TRUE), tables_list)
+
+# Display the merged table
+kable(merged_table)
+```
+
+After this we no longer considered the mode of IntractTV.
+
+## Session
+
+We then looked at the total courses offered for each different session length.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Total Courses for Each Session"
+
+# Create a table for each course type
+course_types <- c("Reg_Session", "First_Half_Session", "Second_Half_Session", "First_Third_Session", "Second_Third_Session", "Third_Third_Session", "Ten_Week", "Thirteen_Week", "Other")
+
+tables_list <- lapply(course_types, function(course) {
+  table_data <- study_data %>%
+    group_by(College) %>%
+    summarise(Mean_Enrollment = round(sum(get(course), na.rm = TRUE), 2))
+  
+  names(table_data)[2] <- paste("", course)
+  table_data
+})
+
+# Merge tables into a single table by College name
+merged_table <- Reduce(function(x, y) merge(x, y, by = "College", all = TRUE), tables_list)
+
+# Display the merged table
+kable(merged_table)
+```
+
+After this, we decided to only consider Regular Session, First Half Session, and Second Half Session in further analysis.
+
+## Summary
+
+After exploring the data, we were able to remove some colleges and course attributes from further analysis. We were also able to gain a full understanding of the information in the data and begin to develop ideas for further analysis.
