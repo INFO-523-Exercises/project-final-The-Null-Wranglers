@@ -1,6 +1,5 @@
 ---
-title: "Exploratory Data Analysis of Grade Outcomes Data"
-subtitle: "Proposal Final Project"
+title: "Exploratory Data Analysis"
 author: "The Null Wranglers Team"
 format: html
 editor: visual
