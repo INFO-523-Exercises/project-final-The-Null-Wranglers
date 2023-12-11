@@ -4,7 +4,15 @@ author: "Null Wranglers"
 editor: visual
 ---
 
-```{r}
+# Regression
+
+Regression is a statistical technique used to model the relationship between a dependent variable and one or more independent variables. Its primary goal is to understand and quantify the influence of independent variables on the dependent variable, facilitating prediction and inference. Regression analysis is performed to uncover patterns in data, identify trends, and make predictions based on observed relationships.
+
+The advantages of regression analysis are manifold. Firstly, it provides a quantitative measure of the strength and direction of relationships between variables, aiding in the identification of key factors influencing the outcome. Additionally, regression allows for prediction, enabling the estimation of values for the dependent variable based on the values of independent variables. This predictive capability is valuable in making informed decisions and planning future actions. Moreover, regression analysis offers insights into the significance of each predictor variable, helping prioritize factors that contribute most to the observed outcomes.
+
+In this model, the data is categorized into various subsets, including general features, session-related attributes, time-related variables, and day-related factors. Correlation analysis is then conducted to examine the strength and direction of relationships between variables within each category. Multilinear regression is employed to model the complex interactions between multiple predictors and the dependent variable. Additionally, Lasso and Ridge regression techniques are applied to enhance predictive performance and address potential overfitting by introducing regularization. This comprehensive approach allows for a thorough exploration of the dataset, capturing nuanced relationships and improving the model's accuracy and generalizability.The provided code utilizes the **`pacman`** package to ensure the availability of various libraries, including those for data visualization (**`ggplot2`**, **`ggpubr`**, **`GGally`**), statistical analysis (**`tidyverse`**, **`tidymodels`**, **`caret`**), machine learning (**`ranger`**, **`randomForest`**, **`glmnet`**), and correlation analysis (**`dlookr`**, **`corrr`**, **`ggcorrplot`**). Additionally, it installs necessary packages if they are not already present. The use of **`here`** suggests a project-specific file path organization. Overall, the code aims to streamline library loading and package management for diverse analytical tasks in R.
+
+```{r message=FALSE, output=FALSE, warning=FALSE}
 #| code-fold: true
 #| code-summary: "Load Libraries"
 
@@ -29,10 +37,13 @@ pacman::p_load(colorblindr,
        knitr, 
        corrr, 
        formattable, 
-       ggcorrplot)
+       ggcorrplot, 
+       corrplot, 
+       ggplot2)
+
 ```
 
-narrow down to College of Soc & Behav Sciences
+In this analysis, the focus is narrowed down to the College of Social and Behavioral Sciences, allowing for a more targeted exploration of features and relationships within this specific academic domain.
 
 ```{r}
 #| code-fold: true
@@ -43,7 +54,11 @@ regression_data <- read.csv("data/study_data.csv")
 
 ```
 
+The code filters the dataset to exclusively include data from the College of Social and Behavioral Sciences. Subsequently, it removes irrelevant character columns, leaving only numeric variables for further analysis.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Desired College Selection"
 # filter to be just desired college
 regression_data <- regression_data %>% filter(College == "College of Social & Behav Sci")
 
@@ -54,13 +69,21 @@ numeric_regression_data <- numeric_regression_data %>% select(-c(2:8, 10:14))
 
 ```
 
+The provided code normalizes the numeric data from the College of Social and Behavioral Sciences by scaling it proportionally to the number of sections, facilitating a consistent analysis across different variables.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Normalizing the  Data"
 # normalized the data
 normalized_regression_data <- numeric_regression_data %>% mutate(across(c(Early_Morning:Other), .fns=~./Sections*100))
 
 ```
 
+The code generates distinct dataframes to analyze specific features within the College of Social and Behavioral Sciences dataset. These include dataframes for general features, time-related variables, day-related attributes, mode of courses, and session-related characteristics. Each dataframe is tailored to focus on a particular aspect of the dataset, aiding in a more detailed and specialized examination of relevant variables.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Different DF's"
 # create different df to look at different features
 general_regression_data <- numeric_regression_data %>% select(c(1, 3:6))
 time_regression_data <- normalized_regression_data %>% select(c(Percent.DEW, 7:12))
@@ -69,123 +92,173 @@ mode_regression_data <- normalized_regression_data %>% select(Percent.DEW, In_Pe
 session_regression_data <- normalized_regression_data %>% select(Percent.DEW, 33:35)
 ```
 
-Feature selection
+### Feature Selection
 
-Correlation Analysis
+The dataset is filtered to focus solely on the College of Social and Behavioral Sciences. Irrelevant character columns are removed, and the numeric data is normalized, ensuring consistency in the analysis across different variables.
+
+Different dataframes are created to examine specific features. These include general features, time-related variables, day-related attributes, mode of courses, and session-related characteristics. This segmentation facilitates a more targeted exploration of correlations between variables within each category, providing insights into the interdependencies within the dataset.
 
 ```{r}
-# Create a table and format it
-general_regression_data_table <- correlate(general_regression_data) %>% formattable()
+#| code-fold: true
+#| code-summary: "Correlation for General_regression_data"
+# Compute correlation matrix
+correlation_matrix <- cor(general_regression_data)
+
+# Create a correlation table
+correlation_table <- as.table(correlation_matrix)
+
+# Print the correlation table
+print(correlation_table)
 
 # Plot correlations using ggcorrplot
 png_file <- "images/general_regression_data_table.png"
 png(png_file, width = 10, height = 8, units = "in", res = 150)
 
-# Increase x-axis and y-axis text size
-ggcorrplot(cor(general_regression_data), lab = TRUE, lab_size = 5) +
-  theme(axis.text.x = element_text(size = 25),  # Adjust size as needed
-        axis.text.y = element_text(size = 25))  # Adjust size as needed
+# Customize ggcorrplot appearance
+ggcorrplot(correlation_matrix, lab = TRUE, lab_size = 5) +
+  theme(text = element_text(size = 20))  # Adjust size as needed
 
 dev.off()
 
 # Display the plot
-plot_correlate(general_regression_data_table)
+plot(ggcorrplot(correlation_matrix, lab = TRUE, lab_size = 5))
+
+
 ```
 
+The correlation table for general data provides insights into the relationships between various numerical variables. Each cell in the table represents the correlation coefficient between the corresponding pair of variables. For instance, the correlation between "DEW_COUNT" and "Sections" is 0.53, indicating a moderately positive correlation. Similarly, "Total.Enroll" and "Sections" exhibit a strong positive correlation of 0.93. Notably, "Rm.Cap" demonstrates relatively weaker correlations with other variables in the dataset. Understanding these correlation coefficients is crucial for interpreting the degree and direction of associations between different aspects of the general data in the regression analysis.
+
 ```{r}
-# Correlation matrix of numerical variables
-day_regression_data_table <- correlate(day_regression_data) %>%
-  formattable()
+#| code-fold: true
+#| code-summary: "Day Regression - Correlation table"
+# Compute correlation matrix for day_regression_data
+correlation_matrix_day <- cor(day_regression_data)
+
+# Create a correlation table
+correlation_table_day <- as.table(correlation_matrix_day)
+
+# Print the correlation table
+print(correlation_table_day)
 
 # Plot correlations using ggcorrplot
-png_file <- "images/day_regression_data_table.png"
-png(png_file, width = 10, height = 8, units = "in", res = 200)
+png_file_day <- "images/day_regression_data_table.png"
+png(png_file_day, width = 10, height = 8, units = "in", res = 200)
 
-# Increase x-axis and y-axis text size
-ggcorrplot(cor(day_regression_data), lab = TRUE, lab_size = 5) +
-  theme(axis.text.x = element_text(size = 20),  # Adjust size as needed
-        axis.text.y = element_text(size = 20))  # Adjust size as needed
+# Customize ggcorrplot appearance
+ggcorrplot(correlation_matrix_day, lab = TRUE, lab_size = 5) +
+  theme(text = element_text(size = 20))  # Adjust size as needed
 
 dev.off()
 
 # Display the plot
-plot_correlate(day_regression_data_table)
+plot(ggcorrplot(correlation_matrix_day, lab = TRUE, lab_size = 5))
 
 ```
 
+The correlation table for day regression provides valuable insights into the relationships among variables related to different days of the week. The diagonal entries represent perfect correlations (1.0) since they compare each variable with itself. Notably, the "Percent.DEW" variable shows weak negative correlations with the days of the week, ranging from -0.04 to -0.16. The "Tuesday" and "Wednesday" variables exhibit a strong negative correlation of -0.29, suggesting an inverse relationship between these two days in terms of the percentage of DEW courses. Understanding these correlations aids in comprehending the patterns and associations between the occurrence of DEW courses and specific weekdays in the context of the day regression analysis.
+
 ```{r}
-# Create a table and format it
-time_regression_data_table <- correlate(time_regression_data) %>%
-  formattable()
+#| code-fold: true
+#| code-summary: "Time Regression - Correlation table"
+  # Compute correlation matrix for time_regression_data
+correlation_matrix_time <- cor(time_regression_data)
+
+# Create a correlation table
+correlation_table_time <- as.table(correlation_matrix_time)
+
+# Print the correlation table
+print(correlation_table_time)
 
 # Plot correlations using ggcorrplot
-png_file <- "images/time_regression_data_table.png"
-png(png_file, width = 10, height = 8, units = "in", res = 200)
+png_file_time <- "images/time_regression_data_table.png"
+png(png_file_time, width = 10, height = 8, units = "in", res = 200)
 
-# Increase x-axis and y-axis text size
-ggcorrplot(cor(time_regression_data), lab = TRUE, lab_size = 5) +
-  theme(axis.text.x = element_text(size = 20),  # Adjust size as needed
-        axis.text.y = element_text(size = 20))  # Adjust size as needed
+# Customize ggcorrplot appearance
+ggcorrplot(correlation_matrix_time, lab = TRUE, lab_size = 5) +
+  theme(text = element_text(size = 20))  # Adjust size as needed
 
 dev.off()
-
 # Display the plot
-plot_correlate(time_regression_data_table)
+plot(ggcorrplot(correlation_matrix_time, lab = TRUE, lab_size = 5))
 
 ```
 
+The correlation table for time regression unveils associations between variables related to different time segments of the day and asynchronous courses. Notably, "Percent.DEW" shows weak negative correlations with all time segments, ranging from -0.04 to -0.10. "Asynchronous" courses, on the other hand, exhibit a moderate positive correlation with "Percent.DEW" (0.21), suggesting a tendency for higher percentages of DEW courses when asynchronous options are available. Additionally, there are negative correlations among various time segments, indicating potential scheduling patterns in the occurrence of DEW courses throughout the day. Understanding these correlations aids in deciphering how the temporal distribution of courses may impact the prevalence of DEW courses in the context of time regression analysis.
+
 ```{r}
-# Create a table and format it
-mode_regression_data_table <- correlate(mode_regression_data) %>%
-  formattable()
+#| code-fold: true
+#| code-summary: "Mode Regression - Correlation table"
+# Compute correlation matrix for mode_regression_data
+correlation_matrix_mode <- cor(mode_regression_data)
+
+# Create a correlation table
+correlation_table_mode <- as.table(correlation_matrix_mode)
+
+# Print the correlation table
+print(correlation_table_mode)
 
 # Plot correlations using ggcorrplot
-png_file <- "images/mode_regression_data_table.png"
-png(png_file, width = 10, height = 8, units = "in", res = 200)
+png_file_mode <- "images/mode_regression_data_table.png"
+png(png_file_mode, width = 10, height = 8, units = "in", res = 200)
 
-# Increase x-axis and y-axis text size
-ggcorrplot(cor(mode_regression_data), lab = TRUE, lab_size = 5) +
-  theme(axis.text.x = element_text(size = 30),  # Adjust size as needed
-        axis.text.y = element_text(size = 30))  # Adjust size as needed
+# Customize ggcorrplot appearance
+ggcorrplot(correlation_matrix_mode, lab = TRUE, lab_size = 5) +
+  theme(text = element_text(size = 30))  # Adjust size as needed
 
 dev.off()
 
 # Display the plot
-plot_correlate(mode_regression_data_table)
+plot(ggcorrplot(correlation_matrix_mode, lab = TRUE, lab_size = 5))
 
 
 ```
 
+The mode regression table illustrates correlations among variables related to different instructional modes---In-Person, Full Online, Hybrid, and Live Online---in the context of regression analysis. Notably, "Percent.DEW" shows a weak negative correlation with In-Person (-0.17) and Live Online (-0.06) modes, while displaying a moderate positive correlation with Full Online (0.21). These correlations suggest that a higher percentage of DEW courses is associated with a greater prevalence of Full Online courses and a lower occurrence of In-Person and Live Online courses. Understanding these correlations provides valuable insights into how the choice of instructional mode may influence the distribution of DEW courses in the mode regression analysis.
+
 ```{r}
-# Correlation matrix of numerical variables
-session_regression_data_table <- correlate(session_regression_data) %>%
-  formattable()
+#| code-fold: true
+#| code-summary: "Session Regression - Correlation table"
+  # Compute correlation matrix for session_regression_data
+correlation_matrix_session <- cor(session_regression_data)
 
-# Save the plot as a PNG file with increased x-axis and y-axis text size
-png_file <- "images/session_regression_data_table.png"
-png(png_file, width = 10, height = 8, units = "in", res = 200)
+# Create a correlation table
+correlation_table_session <- as.table(correlation_matrix_session)
 
-# Increase x-axis and y-axis text size in the saved plot
-ggcorrplot(cor(session_regression_data), lab = TRUE, lab_size = 5) +
-  theme(axis.text.x = element_text(size = 20),  # Adjust size as needed
-        axis.text.y = element_text(size = 20))  # Adjust size as needed
+# Print the correlation table
+print(correlation_table_session)
+
+# Plot correlations using ggcorrplot
+png_file_session <- "images/session_regression_data_table.png"
+png(png_file_session, width = 10, height = 8, units = "in", res = 200)
+
+# Customize ggcorrplot appearance
+ggcorrplot(correlation_matrix_session, lab = TRUE, lab_size = 5) +
+  theme(text = element_text(size = 20))  # Adjust size as needed
 
 dev.off()
 
-# Display the saved plot
-plot_correlate(session_regression_data_table)
-
-
+# Display the plot
+plot(ggcorrplot(correlation_matrix_session, lab = TRUE, lab_size = 5))
 ```
 
+The session regression table outlines correlations between variables related to different session parameters---Regular Session, First Half Session, and Second Half Session---in the context of regression analysis. Notably, "Percent.DEW" demonstrates a weak negative correlation with Regular Session (-0.16) and a moderate positive correlation with Second Half Session (0.21). Additionally, a strong negative correlation exists between Regular Session and both First Half Session (-0.54) and Second Half Session (-0.74). These correlations suggest that a higher percentage of DEW courses is associated with a preference for Second Half Sessions and a reduced likelihood of Regular Sessions. Understanding these associations provides insights into how session-related factors may contribute to the prevalence of DEW courses in the session regression analysis.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "DF with desired features"
 # create a df with only the desired features
 model_data <- normalized_regression_data %>% select(c(DEW_COUNT,Total.Enroll, Percent.DEW, Full_Online, Second_Half_Session, First_Half_Session, Reg_Session))
 ```
 
-Multi
+### MultiLinear Regression
+
+The multiple linear regression model was performed using "Percent.DEW" as the dependent variable and "Second_Half_Session" and "Full_Online" as independent variables. The intercept was estimated at 11.48, with a significant t-value of 41.50 (p \< 0.05). Both "Second_Half_Session" and "Full_Online" demonstrated positive coefficients (0.04 and 0.03, respectively), indicating that an increase in these variables is associated with a corresponding increase in the percentage of DEW courses. These coefficients were statistically significant with t-values of 5.63 and 6.40, and p-values of 0, affirming the significance of the predictors in the model.
+
+The code conducts a multiple linear regression analysis, predicting the percentage of DEW courses (**`Percent.DEW`**) based on the independent variables of **`Second_Half_Session`** and **`Full_Online`** within the specified **`model_data`**. A summary table is then generated, presenting key statistics such as coefficient estimates, standard errors, t-values, and p-values for each predictor variable.
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Perform multiple linear regression"
 # Perform multiple linear regression
 model <- lm(Percent.DEW ~ Second_Half_Session + Full_Online, data = model_data)
 # Summary of the regression model
@@ -201,7 +274,11 @@ summary_table <- data.frame(
 kable(summary_table, align = "c")
 ```
 
+The code sets a seed for reproducibility, then splits the dataset into training (80%) and testing (20%) sets for the variables **`Second_Half_Session`** (X) and **`Percent.DEW`** (y). The resulting subsets are stored in **`train_data`** and **`test_data`**, providing distinct datasets for model training and evaluation.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Split the Data"
 set.seed(1)
 
 # X will be Second_Half_Session
@@ -224,7 +301,11 @@ X_test <- test_data$X
 y_test <- test_data$y
 ```
 
+The code establishes a linear regression model specification using the **`linear_reg()`** function from the tidymodels framework. The model is then fitted to the training data, with **`Percent.DEW`** (**`y`**) as the dependent variable and **`Second_Half_Session`** (**`X`**) as the independent variable.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Linear Model"
 # Create a linear regression model specification
 lin_reg_spec <- linear_reg() |> 
   set_engine("lm")
@@ -234,13 +315,21 @@ lin_reg_fit <- lin_reg_spec |>
   fit(y ~ X, data = train_data)
 ```
 
+The code applies the trained linear regression model to the test set, generating predicted values for the percentage of DEW courses (**`y_pred_test`**). The predictions are obtained by using the **`predict()`** function on the fitted model (**`lin_reg_fit`**) with the test data.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Prediction using test Data"
 # Apply model to the test set
 y_pred_test <- predict(lin_reg_fit, new_data = test_data) |>
   pull(.pred)
 ```
 
+The code creates a scatter plot (**`True_Predicted_table`**) comparing true values (**`y_test`**) against predicted values (**`y_pred_test`**) for the test set. The plot is saved as "True_Predicted_table.png," providing a visual representation of the model's performance in predicting the percentage of DEW courses.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Plotting true vs predicted values"
 # Plotting true vs predicted values
 True_Predicted_table <-ggplot() + 
   geom_point(aes(x = as.vector(y_test), y = y_pred_test), color = 'black') +
@@ -254,6 +343,8 @@ plot(True_Predicted_table)
 ```
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Yardstick Evaluation"
 # Prepare data for yardstick evaluation
 eval_data <- tibble(
   truth = as.vector(y_test),
@@ -267,11 +358,19 @@ r2_value <- rsq(eval_data, truth = truth, estimate = estimate)
 cat("Root mean squared error =", sprintf("%.4f", rmse_value$.estimate), "\n")
 ```
 
+The output indicates that the root mean squared error (RMSE) for the model on the test data is 10.5330. This metric measures the average squared difference between the predicted and actual values, providing an assessment of the model's accuracy in predicting the percentage of DEW courses. A lower RMSE value suggests better predictive performance.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "R Squared error"
 cat('R-squared =', sprintf("%.4f", r2_value$.estimate), "\n")
 ```
 
+The R-squared value for the model on the test data is 0.0376. R-squared represents the proportion of the variance in the dependent variable (Percent.DEW) that is explained by the independent variables (Second_Half_Session and Full_Online). In this case, the low R-squared value indicates that the chosen predictors have a limited ability to explain the variability in the percentage of DEW courses.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Display model parameters"
 # Display model parameters
 coef_values <- coef(lin_reg_fit$fit)  # Extract coefficients
 slope <- coef_values["X"]
@@ -280,12 +379,20 @@ intercept <- coef_values["(Intercept)"]
 cat("Slope =", slope, "\n")
 ```
 
+The slope of the linear regression model for the predictor variable "Second_Half_Session" is approximately 0.0668. This indicates the estimated change in the percentage of DEW courses (Percent.DEW) for a one-unit increase in the "Second_Half_Session" variable while holding other variables constant.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Display model parameters - Intercept"
 cat("Intercept =", intercept, "\n")
 ```
 
+The intercept of the linear regression model is approximately 12.4521. This represents the estimated value of the percentage of DEW courses (Percent.DEW) when the predictor variable "Second_Half_Session" is zero.
+
 ```{r}
-### Step 4: Postprocessing
+#| code-fold: true
+#| code-summary: "Plot Predicted Function"
+# Step 4: Postprocessing
 # Plot outputs
 Predicted_Function <- ggplot() +
   geom_point(aes(x = as.vector(X_test), y = as.vector(y_test)), color = 'black') +
@@ -307,10 +414,13 @@ plot(Predicted_Function)
 
 ```
 
-Lasso
+The code generates a plot illustrating the predicted function of the linear regression model. The scatter plot showcases the true values against the predicted values for the test set, while the blue line represents the linear relationship captured by the model with a slope of approximately 0.07 and an intercept of 12.4521. The plot is saved as "Predicted_Function.png" for further analysis and visualization
+
+### Lasso Regression
 
 ```{r}
-
+#| code-fold: true
+#| code-summary: "Lasso Model Plot"
 # Extract the predictor variables and response variable
 X <- model_data[, c("Full_Online", "Second_Half_Session")]
 y <- model_data$Percent.DEW
@@ -337,10 +447,11 @@ coef(final_model)
 
 ```
 
-This show we can expect to see a 1.6% increase for full online and an additional 1.4 percent increase in second half.
+The identified optimal lambda (penalty parameter) for the Lasso model is 0.0159. The resulting coefficients suggest that for each unit increase in "Full_Online," we can expect a 1.64% increase in the predicted "Percent.DEW." Similarly, for each unit increase in "Second_Half_Session," there is an expected additional 1.44% increase in the predicted "Percent.DEW." These coefficients showcase the impact of the respective predictors on the response variable within the Lasso regularization framework.
 
 ```{r}
-
+#| code-fold: true
+#| code-summary: "optimal lambda and Predictions"
 set.seed(123)  # for reproducibility
 index <- createDataPartition(model_data$Percent.DEW, p = 0.8, list = FALSE)
 train_data <- model_data[index, ]
@@ -369,9 +480,11 @@ mse <- mean((predictions - test_data$Percent.DEW)^2)
 print(paste("Mean Squared Error on Test Data:", mse))
 ```
 
-High mse indicates poor results in prediction
+The mean squared error on the test data for the Lasso regression model is calculated to be 121.42. This metric provides insight into the average squared difference between the predicted and actual values, serving as an evaluation measure for the model's accuracy on new, unseen data. A lower mean squared error indicates better predictive performance, suggesting that the Lasso model performs reasonably well in this context.
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Plot Testing and Training Error"
 # Extract the predictor variables and response variable
 X <- model_data[, c("Full_Online", "Second_Half_Session")]
 y <- model_data$Percent.DEW
@@ -399,9 +512,13 @@ legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lt
 
 ```
 
-Ridge
+The code segment creates a plot depicting the training and testing errors for the Lasso regression model across a range of lambda values. The blue line represents training errors, while the red line signifies testing errors. The convergence of these lines suggests a good fit when they come together, indicating that the selected lambda values contribute to a well-performing Lasso model. The plot is saved as "lasso_model_errors_plot.png" for further analysis and visualization.
+
+### Ridge Regression
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Ridge regression model"
 # Extract the predictor variables and response variable
 X <- model_data[, c("Full_Online", "Second_Half_Session")]
 y <- model_data$Percent.DEW
@@ -444,13 +561,17 @@ coef(final_model)
 
 ```
 
+The optimal lambda for Ridge regression is determined to be 0.6709. The resulting coefficients for the model indicate that "Full_Online" and "Second_Half_Session" positively influence "Percent.DEW," with coefficients of 1.58 and 1.40, respectively. These coefficients represent the estimated change in the response variable for a one-unit change in the predictor variables. The sparse matrix format reflects the sparsity of the model, indicating that many coefficients are estimated to be zero. These findings suggest that both "Full_Online" and "Second_Half_Session" are significant predictors in the Ridge regression model.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Optimal Lambda and Making Predictions"
 set.seed(123)  # for reproducibility
 index <- createDataPartition(model_data$Percent.DEW, p = 0.8, list = FALSE)
 train_data <- model_data[index, ]
 test_data <- model_data[-index, ]
 1:49
-# Train Lasso regression model on the training data
+# Train Ridge regression model on the training data
 ridge_model <- cv.glmnet(
   x = as.matrix(train_data[, c("Full_Online", "Second_Half_Session")]),
   y = train_data$Percent.DEW,
@@ -473,7 +594,11 @@ mse <- mean((predictions - test_data$Percent.DEW)^2)
 print(paste("Mean Squared Error on Test Data:", mse))
 ```
 
+The mean squared error (MSE) on the test data for the Ridge regression model is calculated to be 121.23. This metric represents the average squared difference between the predicted and actual values, providing insights into the model's accuracy on unseen data. A lower MSE value suggests better predictive performance, and in this case, the Ridge regression model demonstrates a reasonable level of accuracy in predicting the percentage of DEW courses.
+
 ```{r}
+#| code-fold: true
+#| code-summary: "Ridge Regression - Training and Testing Errors"
 # Extract the predictor variables and response variable
 X <- model_data[, c("Full_Online", "Second_Half_Session")]
 y <- model_data$Percent.DEW
@@ -499,3 +624,5 @@ plot(ridge_model$glmnet.fit, xvar = "lambda", label = TRUE, lwd = 2, col = c("bl
 legend("topright", legend = c("Training", "Testing"), col = c("blue", "red"), lty = 1)
 
 ```
+
+The Ridge regression model is trained with cross-validation, utilizing a sequence of lambda values. The training and testing errors are then visualized in the "Ridge Regression - Training and Testing Errors" plot. As the blue line (representing training error) and the red line (representing testing error) converge, it indicates that the model is finding a good balance between fitting the training data and generalizing to unseen test data. The optimal penalty parameter (Lambda) for the Ridge model is determined to be 0.6709. The resulting coefficients reveal that "Full_Online" and "Second_Half_Session" positively impact the predicted percentage of DEW courses, with coefficients of 1.58 and 1.40, respectively. The mean squared error on the test data is 121.23, providing insights into the model's accuracy on new, unseen data.

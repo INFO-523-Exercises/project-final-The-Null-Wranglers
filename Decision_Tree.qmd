@@ -1,5 +1,6 @@
 ---
 title: "Decision_Tree"
+author: "The Null wranglers"
 editor: visual
 ---
 
@@ -12,58 +13,72 @@ library(knitr)
 library(lubridate)
 library(ggplot2)
 library(dplyr)
+library(rpart)
+library(rpart.plot)
 ```
 
 ```{r}
-
-library(rpart)
-library(rpart.plot)
-
+#| code-fold: true
+#| code-summary: "Load and Filter Data"
+#| label: Decision tree code
 data <- read.csv("data/study_data.csv")
 
+
+# Filter the data to include only classes with one section
 filtered_data1 <- data %>% filter(Sections <= 1)
 
 
-# Change values in the "DEW_COUNT" column
+# Categorize DEW_COUNT based on the mean value of Percent.DEW
 
 filtered_data1$DEW_COUNT[filtered_data1$Percent.DEW <= 12.2] <- 'Low'
 
 filtered_data1$DEW_COUNT[filtered_data1$Percent.DEW > 12.2] <- 'High'
 
-
+# Convert DEW_COUNT to a factor variable
 filtered_data1$DEW_COUNT <- as.factor(filtered_data1$DEW_COUNT)
 
+# Select relevant columns for the decision tree
+tree_data <- select(filtered_data1, DEW_COUNT, Full_Online, Hybrid, Live_Online, Reg_Session, Monday,Tuesday, Wednesday, Thursday, Friday, Saturday,              Sunday, Early_Morning, Mid_Morning, Early_Afternoon, Mid_Afternoon, Evening, Asynchronous  )
 
-tree_data <- select(filtered_data1, DEW_COUNT, Full_Online, Hybrid, Live_Online, Reg_Session, Monday,         Tuesday, Wednesday, Thursday, Friday, Saturday,              Sunday, Early_Morning, Mid_Morning, Early_Afternoon, Mid_Afternoon, Evening, Asynchronous  )
-
-
+# Convert selected columns to logical (TRUE/FALSE) values
 col_names <- c("Full_Online", "Hybrid", "Live_Online", "Reg_Session", "Monday",         "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday",              "Sunday", "Early_Morning", "Mid_Morning", "Early_Afternoon", "Mid_Afternoon", "Evening", "Asynchronous" )
-
-
 tree_data[col_names] <- sapply(tree_data[col_names], as.logical)
 
+```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Confirm that NA Values are removed"
+#| label: Missing values
 # Check for missing values in the dataset
-
 missing_values <- colSums(is.na(tree_data))
+print(missing_values)
+```
 
+```{r}
+#| code-fold: true
+#| code-summary: "Summarize Data"
+#| label: summary
+# Display a summary of the dataset
 summary(tree_data)
+```
 
-
-# as_tibble(tree_data)
-
-# Assuming 'tree_data' is your dataset
-library(rpart)
-library(rpart.plot)
-
-# Build a decision tree with default settings using magrittr pipe
+```{r}
+#| code-fold: true
+#| code-summary: "Create and Visualize Tree"
+#| label: Decision tree plot
+# Build a decision tree
 tree_default <- tree_data %>%
   rpart(DEW_COUNT ~ ., data = .)
 
-# Plot the decision tree using rpart.plot and save it as a PNG file
+# Plot the decision tree and save it as a PNG file
 png("images/decision_tree.png", width = 1000, height = 600)
 rpart.plot(tree_default, box.palette = "auto", shadow.col = "gray", nn = TRUE, roundint = FALSE, cex = 1.5)
 dev.off()
 
-# Plot the decision tree with an increased size
+# Plot the decision tree
 rpart.plot(tree_default, box.palette = "auto", shadow.col = "gray", nn = TRUE, roundint = FALSE, cex = 1.5)
 ```
+
+1.  The decision tree predicts "High" if Full_Online is \>= 0.5; otherwise, it predicts "Low."
+2.  Tree building stops when additional splits don't significantly improve performance or when there are insufficient observations for further splitting.

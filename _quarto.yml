@@ -2,20 +2,14 @@ project:
   type: website
 
 website:
-  title: Project Title
+  title: Analysis of Grade Outcomes
   navbar:
     right:
       - icon: github
         href: https://github.com/INFO526-DataViz/project-01
     left:
-      - text: Project
+      - text: Project Report
         href: index.qmd
-      - text: Proposal
-        href: proposal.qmd
-      - text: Presentation
-        href: presentation.qmd
-      - text: About
-        href: about.qmd
       - text: EDA
         href: EDA_Grade_Outcomes.qmd
       - text: Anomaly Detection
@@ -26,6 +20,12 @@ website:
         href: Decision_Tree.qmd
       - text: Regression
         href: regression.qmd
+      - text: Presentation
+        href: presentation.qmd
+      - text: Proposal
+        href: proposal.qmd
+      - text: About
+        href: about.qmd
 
 format:
   html:

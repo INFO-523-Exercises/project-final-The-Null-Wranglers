@@ -14,6 +14,7 @@ editor: visual
 execute:
   echo: false
 ---
+
 # Introduction
 
 ```{r}
@@ -60,15 +61,15 @@ study_data <- read.csv("data/study_data.csv")
 dew_data <- read.csv("data/clean_dew_data.csv")
 ```
 
-
+# 
 
 -   Goal: To analyze and understand the student grade outcomes at the University of Arizona (UArizona) before, during, and after the COVID-19 pandemic.
 
 Research Questions:
 
-  (1) Pattern Analysis -- What if any patterns or relationships exist between colleges, departments, or course level and grade outcomes for enrolled students?
-  
-  (2) Predictive Modeling -- Can a predictive model be developed that accurately forecasts grade outcomes based on course attributes?
+(1) Pattern Analysis -- What if any patterns or relationships exist between colleges, departments, or course level and grade outcomes for enrolled students?
+
+(2) Predictive Modeling -- Can a predictive model be developed that accurately forecasts grade outcomes based on course attributes?
 
 # Datasets
 
@@ -152,7 +153,6 @@ kable(dew_total, caption =  "Total D, F, W Grade Counts for Each College per Sem
 # Despite enrollment staying steady, we see a noticeable decrease in DEW outcomes for the spring of 2020. Followed by an increase for the fall of 2020.
 ```
 
-
 ## 
 
 *We calculated the mean averages for the pass, D, E, W, and DEW rates across the five selected colleges.*
@@ -178,7 +178,6 @@ kable(college_means_data,
                caption = "Means for Total Pass, D, E, W, and Total DEW Counts Across Colleges")%>%
   kable_styling(font_size = 18, full_width = F)
 ```
-
 
 # Anomaly Detection
 
@@ -271,7 +270,6 @@ Correlation of Percent DEW, In- Person, Full Online, Hybrid, Live-online
 
 -   \- Second_Half_Session
 
-
 ## Multilinear Regression
 
 ``` r
@@ -300,6 +298,5 @@ y_pred_test <- predict(lin_reg_fit, new_data = test_data) |>
 ## Lasso - Training and Testing Error
 
 ![](images/lasso_model_errors_plot.png){width="639"}
-
 
 # Thank You

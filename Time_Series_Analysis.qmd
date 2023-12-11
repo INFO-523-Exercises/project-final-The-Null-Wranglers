@@ -5,9 +5,12 @@ editor: visual
 ---
 
 ```{r}
+#| code-fold: true
+#| code-summary: "Load Libraries"
 #| label: load-pkgs
 #| message: false
 
+# Loading the necessary packages
 suppressWarnings(library(tidyverse))
 library(knitr)
 library(lubridate)
@@ -15,22 +18,26 @@ library(ggplot2)
 library(dplyr)
 ```
 
-## Dataset Setup
+## Data
 
 ```{r}
 #| code-fold: true
 #| code-summary: "Load data"
+#| 
 # read in data
 study_data <- read.csv("data/study_data.csv")
 kable(head(study_data))
 ```
 
+## Filter the Data
+
 ```{r}
 #| code-fold: true
 #| code-summary: "filter data"
+
+
 # Filter the data for the specified colleges and TERM_LD values
 selected_colleges <- c('College of Agric and Life Sci', 'College of Humanities','College of Science', 'College of Social & Behav Sci', 'Eller College of Management')
-
 
 selected_terms <- c('Fall 2018', 'Spring 2019', 'Fall 2019', 'Spring 2020', 'Fall 2020', 'Spring 2021')
 
@@ -39,26 +46,25 @@ filtered_data <- study_data %>%
 
 ```
 
-```{r, warning=FALSE}
-#DEW count (K) for 5 colleges over semesters - Utkarsha
+## DEW count for the colleges
 
+```{r, warning=FALSE , message=FALSE}
+#| code-fold: true
+#| code-summary: "DEW count for the colleges"
+
+#DEW count (K) for 5 colleges over semesters 
 # Aggregate the data
 
-aggregated_data <- filtered_data %>%
+aggregated_data <- filtered_data %>% 
 
-  group_by(College, TERM_LD) %>%
+  group_by(College, TERM_LD) %>% # group by college and term_ld
 
-  summarise(DEW_COUNT = sum(DEW_COUNT))
-
- 
+  summarise(DEW_COUNT = sum(DEW_COUNT)) # summarize on the basis of sum of DEW grades.
 
 # Convert TERM_LD to a factor with a specific order
 
 filtered_data$TERM_LD <- factor(filtered_data$TERM_LD, levels = selected_terms)
 
- 
-
-# Save the plot to a folder named "images"
 plot <- ggplot(aggregated_data, aes(x = factor(TERM_LD, levels = selected_terms), y = DEW_COUNT, color = College, group = College)) +
   geom_line() +
   geom_point() +
@@ -68,17 +74,18 @@ plot <- ggplot(aggregated_data, aes(x = factor(TERM_LD, levels = selected_terms)
     y = "Total DEW Count"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size=15), axis.text.y = element_text(size=15))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size=10), axis.text.y = element_text(size=15))
   
-
-# Save the plot as a PNG file
-ggsave("images/TSA1.png", plot = plot)
-
 plot
 ```
 
-```{r}
-#DEW counts (H, I, J) for 5 colleges (Facet) over semesters  - Dong
+Caption: This graph shows the change in DEW grades over semesters for the colleges. The drop in DEW grades in Spring 2020 and then the rise in Fall 2020 are some useful insights drawn from this.
+
+```{r, warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "DEW counts (individual counts) for colleges"
+
+# DEW counts (H, I, J) for 5 colleges (Facet) over semesters  
 
 # Aggregate the data by College, TERM_LD, and calculate the sum of D_GRADE_COUNT, FAIL_GRADE_COUNT, and WITHDRAW_GRADE_COUNT
 aggregated_data <- filtered_data %>%
@@ -105,25 +112,32 @@ plot2<-ggplot(aggregated_data, aes(x = TERM_LD, group = College)) +
   scale_color_manual(values = c("D_GRADE_COUNT" = "blue", "FAIL_GRADE_COUNT" = "red", "WITHDRAW_GRADE_COUNT" = "green")) +
   facet_wrap(~College) +
   theme_minimal()+
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size=15), axis.text.y = element_text(size=15),
-        strip.text = element_text(size = 15, angle = 0, hjust = 0.5),
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size=10), axis.text.y = element_text(size=10),
+        strip.text = element_text(size = 10, angle = 0, hjust = 0.5),
         legend.position = "bottom",  # Place legend at the bottom
         legend.direction = "horizontal",  # Display legend horizontally
         legend.box = "horizontal")  # Align legend items horizontally
-# Save the plot as a PNG file
-ggsave("images/TSA2.png", plot = plot2, width = 12, height = 8, units = "in")
+
+plot2
 
 ```
 
-```{r}
-#DEW counts (F) based on the division level over semesters - Anjani
+Caption: This graph shows the change in DEW grades (each grade) over semesters for the colleges. Here, it is clearly visible that there are more Failing Grades (E grade) when compared to other grades in almost all colleges.
+
+## Class Offerings by Division Level
+
+```{r, warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Number of courses in different divisions"
+ 
+# Number of students attending different division classes
 
 # Rename the 'course.level' column to 'Course_Level'
 filtered_data <- filtered_data %>%
   rename(Course_Level = 	Course.Level)
 
 grouped_data <- filtered_data %>%
-  group_by(College, TERM_LD, Course_Level)
+  group_by(College, TERM_LD, Course_Level) # group by college and term_ld
 
 # Convert TERM_LD to factor with ordered levels
 grouped_data$TERM_LD <- factor(
@@ -150,37 +164,32 @@ plot3 <- ggplot(summary, aes(x = TERM_LD, y = count, group = Course_Level, color
     y = "Count"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1,  size=15), axis.text.y = element_text(size=15),
-        strip.text = element_text(size = 15, angle = 0, hjust = 0.5),
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,  size=10), axis.text.y = element_text(size=10),
+        strip.text = element_text(size = 10, angle = 0, hjust = 0.5),
         legend.position = "bottom",  # Place legend at the bottom
         legend.direction = "horizontal",  # Display legend horizontally
         legend.box = "horizontal")  # Align legend items horizontally
 
-# Save the plot as a PNG file
-ggsave("images/TSA3.png", plot = plot3, width = 12, height = 8, units = "in")
-
+plot3
 
 ```
 
-```{r}
-study_data <- read.csv("data/study_data.csv")
+Caption: This graph shows the total number of courses offered by divison level (lower or upper division) over semesters. College of Humanities and College of Science have similar rate of courses in both divisions but the others have a higher number of upper division classes than the lower division ones.
 
-# Filter the data for the specified colleges and TERM_LD values
-study_data_selected_terms <- c('Fall 2018', 'Spring 2019', 'Fall 2019', 'Spring 2020', 'Fall 2020', 'Spring 2021')
+## Course Offerings by Time of Day
 
-study_data_filtered_data <- study_data %>%
-  filter(College %in% selected_colleges & TERM_LD %in% study_data_selected_terms)
+```{r, warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Number of classes in different time slots"
 
-```
 
-```{r}
-#How time affects classes (columns AH to AM) for different colleges (the five mentioned above)
+# Number of students attending classes in different time slots for the colleges
 
 # Create the table for each time slot
 time_slots <- c("Early_Morning", "Mid_Morning", "Early_Afternoon", "Mid_Afternoon", "Evening", "Asynchronous")
 
 tables_list <- lapply(time_slots, function(slot) {
-  table_data <- study_data_filtered_data%>%
+  table_data <- filtered_data%>%
     group_by(College, TERM_LD) %>%
     summarise(Total_Classes_Attended = sum(!!sym(slot), na.rm = TRUE))
 })
@@ -201,7 +210,7 @@ merged_table_long <- tidyr::pivot_longer(merged_table, cols = starts_with("Total
 # Convert TERM_LD to factor with ordered levels
 merged_table_long$TERM_LD <- factor(
   merged_table_long$TERM_LD,
-  levels = study_data_selected_terms,
+  levels = selected_terms,
   ordered = TRUE
 )
 
@@ -215,26 +224,30 @@ plot4<-ggplot(merged_table_long, aes(x = TERM_LD, y = Total_Classes_Attended, co
     y = "Total Classes Attended"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1,  size=15), axis.text.y = element_text(size=15),
-        strip.text = element_text(size = 15, angle = 0, hjust = 0.5),
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,  size=10), axis.text.y = element_text(size=10),
+        strip.text = element_text(size = 10, angle = 0, hjust = 0.5),
         legend.position = "bottom",  # Place legend at the bottom
         legend.direction = "horizontal",  # Display legend horizontally
         legend.box = "horizontal") # Align legend items horizontally
        
-
-# Save the plot as a PNG file
-ggsave("images/TSA4.png", plot = plot4, width = 10, height = 8, units = "in")
-
+plot4
 ```
 
-```{r}
-#Total number of classes per week (AN to AT) - Anjani
+Caption: This graph shows the total number of course offerings for different time over semesters. The interesting insight here is that more asynchronous classes were offered when compared to all other different slots, especially in the College of Social and Behavioral Sciences.
+
+## Course Offerings by Weekday
+
+```{r, warning=FALSE, message=FALSE}
+#| code-fold: true
+#| code-summary: "Number of classes offered by different days of the week"
+
+# Number of students attending classes in different days of the week
 
 # Create a table for each day of the week
 weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 
 tables_list <- lapply(weekdays, function(slot) {
-  table_data <- study_data_filtered_data%>%
+  table_data <- filtered_data%>%
     group_by(College, TERM_LD) %>%
     summarise(Total_Classes_Attended = sum(!!sym(slot), na.rm = TRUE))
 })
@@ -254,7 +267,7 @@ merged_table_long <- tidyr::pivot_longer(merged_table, cols = starts_with("Total
 # Convert TERM_LD to factor with ordered levels
 merged_table_long$TERM_LD <- factor(
   merged_table_long$TERM_LD,
-  levels = study_data_selected_terms,
+  levels = selected_terms,
   ordered = TRUE
 )
 
@@ -266,55 +279,23 @@ merged_table_long$Time_Slot <- factor(
 )
 
 # Plotting the facet plot
-ggplot(merged_table_long, aes(x = TERM_LD, y = Total_Classes_Attended, color = Time_Slot, group = Time_Slot)) +
+plot5<-ggplot(merged_table_long, aes(x = TERM_LD, y = Total_Classes_Attended, color = Time_Slot, group = Time_Slot)) +
   geom_line() +
   facet_wrap(~ College, scales = "free") +
   labs(
-    title = "Total Classes Attended in Different Days for Colleges",
+    title = "",
     x = "Term ID",
     y = "Total Classes Attended"
   ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10), axis.text.y = element_text(size=10),
+        strip.text = element_text(size = 10, angle = 0, hjust = 0.5),
+        legend.position = "bottom",  # Place legend at the bottom
+        legend.direction = "horizontal",  # Display legend horizontally
+        legend.box = "horizontal") # Align legend items horizontally
+
+plot5
 
 ```
 
-```{r}
-#Total Number of students enrolled in different types of teaching format (columns AU to BB) for different colleges - Dong
-
-#  Only look at five colleges: Agriculture, Social and Behavioral, Eller, Humanities, Science
-study_data<- study_data%>%
-  filter(College == "College of Agric and Life Sci" | College ==  "Eller College of Management"|  College == "College of Social & Behav Sci"| College == "College of Science"|  College ==  "College of Humanities")
-
-```
-
-```{r, fig.width=14}
-# total number of courses by colleges
-study_data%>%
-  group_by(College) %>%
-  ggplot(aes( x = College,
-          	fill = College))+
-  geom_bar(position = "dodge")
-```
-
-```{r, fig.width=18, fig.height = 14}
-#3 Mean student enrollment in different types of teaching format (columns AU to BB) by colleges - Dong
-
-# Reshape data and calculate mean enrollment
-long_data <- study_data%>%
-  pivot_longer(
-	cols = Laboratory:Practicum,
-	names_to = "TeachingFormat",
-	values_to = "Enrollment"
-  ) %>%
-  group_by(College, TeachingFormat) %>%
-  summarise(MeanEnrollment = mean(Enrollment, na.rm = TRUE))
-
-# Create a plot with facets for each college, adding colors for each TeachingFormat
-ggplot(long_data, aes(x = TeachingFormat, y = MeanEnrollment, fill = TeachingFormat)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(~ College) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size=4)) +
-  scale_fill_brewer(palette = "Set1")  
-
-```
+Caption: This graph shows the total number of classes by different days of the week over semesters. Here, it is clear that a smaller number of classes were offered on Fridays when compared to other days of the week. Another interesting trend to observe is that there is a downfall in almost all colleges, which explains that increase of asynchronous classes in the recent semesters when compared to the earlier semesters.

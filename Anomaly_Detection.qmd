@@ -57,7 +57,7 @@ In the percentages of DEW for courses, we anticipated to see the data to be skew
 
 # create new df of the top quartile
 anomaly_25 <- anomaly_data %>% 
-  filter(Percent.DEW>19)
+  filter(Percent.DEW>19) 
 
 ggplot(anomaly_25, aes(x = Percent.DEW)) +
   geom_histogram(binwidth = 2, fill = "blue", color = "black", alpha = 0.8) +
@@ -77,6 +77,18 @@ ad1 <- ggplot(anomaly_data, aes(y = College, x = Percent.DEW)) +
 ggsave("images/ad1.png", plot=ad1)
 ad1
 ```
+
+```{r}
+#| code-fold: true
+#| code-summary: "Table of Extreem Outliers"
+extreme_outliers <- anomaly_25 %>% 
+  filter(Percent.DEW >= 60)
+extreme_outliers <- select(extreme_outliers, c(College, Department, Course.Description, Total.Student.Count, Percent.DEW, TERM_LD))
+kable(extreme_outliers)
+
+```
+
+This table shows what was considered an extreme outlier where more than 60% of students received a D, E, or W grade value.
 
 The next plot shows how DEW Percentage for each mode for courses. The outliers seem to be evenly distributed across the types of different modes for courses and not isolated to a specific mode.
 

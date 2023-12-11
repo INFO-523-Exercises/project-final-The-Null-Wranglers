@@ -94,7 +94,7 @@ dew_data <- dew_data %>% filter(College != "College of Applied Sci & Tech",
                                 College != "College of Fine Arts")
 ```
 
-## Overall Averages 
+## Overall Averages
 
 Once the data was reduced, the remaining data contained 8707 observations with 24 variables. Averages for course enrollment and well as D.E.W. averages were calculated and are displayed below.
 
@@ -129,9 +129,8 @@ Despite enrollment staying steady, we see a noticeable decrease in DEW outcomes 
 As certain courses had total enrollment over 1000, the issue that the D.E.W. count from these courses could skew the data was considered. The decision to base further analysis on the D.E.W. percentage was made.
 
 ```{r}
-# Assuming you have the ggplot2 library installed
-# If not, install it using install.packages("ggplot2")
-library(ggplot2)
+#| code-fold: true
+#| code-summary: "Mean DEW Counts"
 
 dew_data1 <- read.csv("data/study_data.csv")
 
@@ -151,7 +150,7 @@ means_data <- data.frame(
 )
 
 # Creating a bar plot
-ggplot(means_data, aes(x = Variable, y = Mean_Value, fill = Variable)) +
+mean_percents <- ggplot(means_data, aes(x = Variable, y = Mean_Value, fill = Variable)) +
   geom_bar(stat = "identity") +
   geom_text(aes(label = round(Mean_Value, 2)), vjust = -0.5, size = 3) +  # Add text labels
   labs(title = "Mean of Percentages of Pass and D.E.W Grades",
@@ -160,14 +159,12 @@ ggplot(means_data, aes(x = Variable, y = Mean_Value, fill = Variable)) +
   theme_minimal()+
   theme_linedraw()+
   theme(legend.position = "bottom", panel.grid = element_blank())
+ggsave("images/mean_percents.png", plot=mean_percents)
 ```
 
 ```{r}
-# Assuming you have the dplyr, knitr, and stringr libraries installed
-# If not, install them using install.packages(c("dplyr", "knitr", "stringr"))
-library(dplyr)
-library(knitr)
-library(stringr)
+#| code-fold: true
+#| code-summary: "Mean Table of DEW Counts"
 
 # Group by College and calculate the mean for each grade-related column
 college_means_data <- dew_data %>%

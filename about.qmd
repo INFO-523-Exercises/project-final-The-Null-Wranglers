@@ -1,17 +1,18 @@
 ---
-title: "Descriptive analysis of grade outcomes"
+title: "Descriptive Analysis of Grade Outcomes"
+author: "The Null Wranglers"
 format: html
 editor: visual
 ---
 
 This project was developed by **\[The Null Wranglers\]** For [INFO 523 - Data Mining and Discovery](https://datamineaz.org/) at the University of Arizona, taught by Dr. Greg Chism. The team is comprised of the following team members.
 
--   Krist Manasil : PhD in Infromation, First Year
+-   Kristi Manasil : PhD in Information, First Year
 
 -   Dong Chen : PhD in Higher Education , Second Year
 
 -   Utkarsha Patil : MS in Data Science, First Year
 
--   Anajni Sowmya Bollapragada : MS in Data Science, First Year
+-   Anjani Sowmya Bollapragada : MS in Data Science, First Year
 
 -   Rohit Hemaraja : MS in Data Science, First Year
